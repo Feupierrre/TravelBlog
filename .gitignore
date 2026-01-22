@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment 
+venv/
+.venv/
+env/
+
+# Environment variables 
+.env
+
+# Database 
+db.sqlite3
+
+# OS specific 
+.DS_Store
+Thumbs.db
+
+# Media 
+media/
+!media/.gitkeep
