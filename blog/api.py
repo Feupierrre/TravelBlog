@@ -45,3 +45,30 @@ class PostDetailSchema(Schema):
 def get_post(request, slug:str):
     post = get_object_or_404(Post, slug=slug, is_published=True)
     return post
+
+class PostListSchema(Schema):
+    id: int
+    title: str
+    slug: str
+    author: str
+    location_name: str
+    cover_image_url: Optional[str] = None
+    created_at: str
+
+    @staticmethod
+    def resolve_author(obj):
+        return obj.author.username
+
+    @staticmethod
+    def resolve_cover_image_url(obj):
+        if obj.cover_image:
+            return obj.cover_image.url
+        return None
+    
+    @staticmethod
+    def resolve_created_at(obj):
+        return obj.created_at.strftime("%d %B %Y")
+
+@api.get("/posts", response=List[PostListSchema])
+def list_posts(request):
+    return Post.objects.filter(is_published=True)
