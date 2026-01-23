@@ -21,9 +21,7 @@ class Post(models.Model):
         ordering = ['-created_at']
 
 class PostBlock(models.Model):
-    """
-    Блок контента. Пост состоит из списка таких блоков.
-    """
+
     BLOCK_TYPES = [
         ('text', 'Text (Markdown)'),
         ('image', 'Image'),
