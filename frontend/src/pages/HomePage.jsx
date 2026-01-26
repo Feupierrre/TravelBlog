@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Импортируем спец-ссылку
+import { Link } from 'react-router-dom'; 
 
 function HomePage() {
     const [posts, setPosts] = useState([]);
