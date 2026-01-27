@@ -1,0 +1,75 @@
+/* frontend/src/components/Header.css */
+
+.header {
+    position: sticky; /* Липнет к верху */
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    height: var(--header-height);
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый */
+    backdrop-filter: blur(10px); /* Эффект размытия (матовое стекло) */
+    border-bottom: 1px solid var(--color-border);
+    transition: all 0.3s ease;
+}
+
+.header-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-family: var(--font-serif); /* Логотип оставим красивым/журнальным */
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo span {
+    color: var(--color-primary); /* Зеленый цвет для иконки */
+}
+
+.nav {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-link {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--color-primary);
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-login {
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    border-radius: 50px;
+    background-color: var(--color-primary);
+    color: white;
+    transition: background 0.2s;
+}
+
+.btn-login:hover {
+    background-color: var(--color-primary-hover);
+}
