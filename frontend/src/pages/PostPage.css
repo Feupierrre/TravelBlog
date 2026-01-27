@@ -1,0 +1,117 @@
+.post-header {
+    position: relative;
+    height: 70vh;
+    min-height: 500px;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 60px;
+    background-color: #1A251C;
+}
+
+.post-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; 
+    z-index: 1;
+}
+
+.post-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+    z-index: 2;
+}
+
+.post-title-container {
+    position: relative;
+    z-index: 3;
+    color: white;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.post-meta-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(5px);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.post-title {
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+
+.post-info {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    opacity: 0.9;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.post-content {
+    max-width: 740px; 
+    margin: -40px auto 60px; 
+    position: relative;
+    z-index: 4;
+    background: var(--color-bg-light); /* Фон страницы */
+    padding: 40px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    line-height: 1.8;
+    font-size: 1.15rem;
+    color: var(--color-text-main);
+}
+
+.post-content p {
+    margin-bottom: 24px;
+}
+
+.post-content p:first-of-type::first-letter {
+    float: left;
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    line-height: 0.8;
+    margin-right: 10px;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.post-image {
+    width: 100%; 
+    margin-left: 0%;
+    border-radius: var(--radius-md);
+    margin-top: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .post-header { height: 50vh; }
+    .post-title { font-size: 2rem; }
+    .post-content { padding: 20px; margin-top: 0; }
+    .post-image { width: 100%; margin-left: 0; }
+}
