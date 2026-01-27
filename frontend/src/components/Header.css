@@ -1,13 +1,12 @@
-/* frontend/src/components/Header.css */
 
 .header {
-    position: sticky; /* Липнет к верху */
+    position: sticky; 
     top: 0;
     z-index: 1000;
     width: 100%;
     height: var(--header-height);
-    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый */
-    backdrop-filter: blur(10px); /* Эффект размытия (матовое стекло) */
+    background-color: rgba(255, 255, 255, 0.8); 
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--color-border);
     transition: all 0.3s ease;
 }
@@ -23,7 +22,7 @@
 }
 
 .logo {
-    font-family: var(--font-serif); /* Логотип оставим красивым/журнальным */
+    font-family: var(--font-serif); 
     font-size: 1.5rem;
     font-weight: 900;
     color: var(--color-text-main);
@@ -33,7 +32,7 @@
 }
 
 .logo span {
-    color: var(--color-primary); /* Зеленый цвет для иконки */
+    color: var(--color-primary); 
 }
 
 .nav {
