@@ -40,3 +40,10 @@ class PostBlock(models.Model):
         verbose_name = "Content block"
         verbose_name_plural = "Content blocks"
         ordering = ['position']
+
+class VisitedCountry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='visited_countries')
+    country_code = models.CharField(max_length=3) 
+
+    class Meta:
+        unique_together = ('user', 'country_code')

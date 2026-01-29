@@ -32,9 +32,9 @@ const Header = () => {
                 <div className="auth-buttons">
                     {isAuthenticated ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <span style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                            <Link to="/profile" style={{ fontWeight: 'bold', color: 'var(--color-primary)', textDecoration: 'none' }}>
                                 @{username}
-                            </span>
+                            </Link>
                             <button 
                                 onClick={handleLogout} 
                                 style={{ 
