@@ -1,9 +1,15 @@
+from ninja_extra import NinjaExtraAPI 
+from ninja import Schema
 from typing import List, Optional
-from ninja import NinjaAPI, Schema
 from django.shortcuts import get_object_or_404
-from .models import Post
+from .models import Post, PostBlock
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from ninja_jwt.controller import NinjaJWTDefaultController
+from ninja_jwt.authentication import JWTAuth
 
-api = NinjaAPI()
+api = NinjaExtraAPI()
+api.register_controllers(NinjaJWTDefaultController)
 
 class PostBlockSchema(Schema):
     type: str
@@ -72,3 +78,28 @@ class PostListSchema(Schema):
 @api.get("/posts", response=List[PostListSchema])
 def list_posts(request):
     return Post.objects.filter(is_published=True)
+
+class RegisterSchema(Schema):
+    username: str
+    email: str
+    password: str
+
+@api.post("/register")
+def register(request, payload: RegisterSchema):
+    if User.objects.filter(username=payload.username).exists():
+        return api.create_response(request, {"message": "Username already taken"}, status=409)
+    
+    user = User.objects.create(
+        username=payload.username,
+        email = payload.email,
+        password = make_password(payload.password)
+    )
+
+    return {"id": user.id, "username": user.username, "message": "User created successfully"}
+
+@api.get("/me", auth=JWTAuth())
+def me(request):
+    return {
+        "username": request.auth.username,
+        "email": request.auth.email
+    }

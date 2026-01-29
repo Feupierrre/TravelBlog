@@ -1,7 +1,20 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 import './Header.css';
 
 const Header = () => {
+    const navigate = useNavigate();
+    
+    const isAuthenticated = !!localStorage.getItem('accessToken');
+    const username = localStorage.getItem('username');
+
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('username');
+        
+        window.location.reload(); 
+    };
+
     return (
         <header className="header">
             <div className="header-container">
@@ -17,7 +30,28 @@ const Header = () => {
                 </nav>
 
                 <div className="auth-buttons">
-                    <Link to="/login" className="btn-login">Sign In</Link>
+                    {isAuthenticated ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <span style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                                @{username}
+                            </span>
+                            <button 
+                                onClick={handleLogout} 
+                                style={{ 
+                                    background: 'none', 
+                                    border: '1px solid var(--color-border)', 
+                                    padding: '8px 16px', 
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem'
+                                }}
+                            >
+                                Log Out
+                            </button>
+                        </div>
+                    ) : (
+                        <Link to="/login" className="btn-login">Sign In</Link>
+                    )}
                 </div>
             </div>
         </header>
