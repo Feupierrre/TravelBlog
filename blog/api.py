@@ -1,8 +1,8 @@
 from ninja_extra import NinjaExtraAPI 
-from ninja import Schema
+from ninja import Schema, File, Form, UploadedFile
 from typing import List, Optional
 from django.shortcuts import get_object_or_404
-from .models import Post, PostBlock, VisitedCountry
+from .models import Post, PostBlock, VisitedCountry, Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from ninja_jwt.controller import NinjaJWTDefaultController
@@ -106,21 +106,57 @@ class UserProfileSchema(Schema):
     id: int
     username: str
     email: str
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
     stories_count: int
     countries_count: int
     visited_countries: List[str] 
 
+    @staticmethod
+    def resolve_avatar_url(obj):
+        if hasattr(obj, 'profile') and obj.profile.avatar:
+            return obj.profile.avatar.url
+        return None
+
+    @staticmethod
+    def resolve_bio(obj):
+        if hasattr(obj, 'profile'):
+            return obj.profile.bio
+        return ""
+
 @api.get("/me", response=UserProfileSchema, auth=JWTAuth())
 def me(request):
     user = request.auth
+    from .models import Profile
+    Profile.objects.get_or_create(user=user)
+
     return {
         "id": user.id,
         "username": user.username,
         "email": user.email,
+        "profile": user.profile,
         "stories_count": Post.objects.filter(author=user, is_published=True).count(),
         "countries_count": VisitedCountry.objects.filter(user=user).count(),
         "visited_countries": [c.country_code for c in VisitedCountry.objects.filter(user=user)]
     }
+
+class ProfileUpdateSchema(Schema):
+    bio: Optional[str] = None
+
+@api.post("/me/update", response=UserProfileSchema, auth=JWTAuth())
+def update_profile(request, payload: ProfileUpdateSchema = Form(...), avatar: UploadedFile = File(None)):
+    user = request.auth
+    profile, _ = Profile.objects.get_or_create(user=user)
+
+    if payload.bio is not None:
+        profile.bio = payload.bio
+
+    if avatar:
+        profile.avatar.save(avatar.name, avatar)
+
+    profile.save()
+
+    return me(request)
 
 @api.post("/countries", auth=JWTAuth())
 def toggle_country(request, payload: CountrySchema):
@@ -134,3 +170,4 @@ def toggle_country(request, payload: CountrySchema):
         country.delete()
         return {"status": "removed", "code": payload.country_code}
     return {"status": "added", "code": payload.country_code}
+

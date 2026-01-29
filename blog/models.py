@@ -47,3 +47,12 @@ class VisitedCountry(models.Model):
 
     class Meta:
         unique_together = ('user', 'country_code')
+
+class Profile(models.Model):
+    user  = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    avatar = models.ImageField(upload_to='avatar/', blank=True, null=True)
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.user.username
