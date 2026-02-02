@@ -13,8 +13,10 @@ const Header = () => {
             setIsAuthenticated(!!localStorage.getItem('accessToken'));
             setUsername(localStorage.getItem('username'));
         };
+
         window.addEventListener('authChange', handleAuthChange);
         window.addEventListener('storage', handleAuthChange);
+
         return () => {
             window.removeEventListener('authChange', handleAuthChange);
             window.removeEventListener('storage', handleAuthChange);
@@ -46,34 +48,15 @@ const Header = () => {
 
                 <div className="auth-buttons">
                     {isAuthenticated ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            <Link to="/write" style={{ 
-                                display: 'flex', alignItems: 'center', gap: '5px',
-                                textDecoration: 'none', color: '#FFFFFF', fontWeight: '600',
-                                fontSize: '1rem', textShadow: '0 2px 5px rgba(0,0,0,0.2)'
-                            }}>
+                        <div className="user-menu">
+                            <Link to="/write" className="link-write">
                                 <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>edit_square</span>
                                 Write
                             </Link>
-
-                            <Link to="/profile" style={{ fontWeight: 'bold', color: '#4F7942', textDecoration: 'none', fontSize: '1rem' }}>
+                            <Link to="/profile" className="link-profile">
                                 @{username}
                             </Link>
-
-                            <button 
-                                onClick={handleLogout} 
-                                style={{ 
-                                    background: 'none', 
-                                    border: '1px solid rgba(255,255,255,0.4)', 
-                                    padding: '8px 20px', 
-                                    borderRadius: '50px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.9rem',
-                                    color: 'white',
-                                    fontWeight: '600',
-                                    backdropFilter: 'blur(5px)'
-                                }}
-                            >
+                            <button onClick={handleLogout} className="btn-logout">
                                 Log Out
                             </button>
                         </div>
