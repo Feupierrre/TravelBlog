@@ -26,8 +26,8 @@ const LoginPage = () => {
                 localStorage.setItem('refreshToken', data.refresh);
                 localStorage.setItem('username', username);
 
+                window.dispatchEvent(new Event("authChange"));
                 navigate('/');
-                window.location.reload();
             } else {
                 console.error("Login failed:", data); 
                 setError('Incorrect login or password.');
@@ -41,8 +41,7 @@ const LoginPage = () => {
     return ( 
         <div className="auth-container">
             <div className="auth-card">
-                <h1 className="auth-title">Welcome Back</h1>
-                <p className="auth-subtitle">Log in to write stories</p>
+                <h1 className="auth-title">Sign in to your account</h1>
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
