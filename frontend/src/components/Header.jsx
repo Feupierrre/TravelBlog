@@ -19,8 +19,8 @@ const Header = () => {
         <header className="header">
             <div className="header-container">
                 <Link to="/" className="logo">
-                    <span className="material-symbols-outlined">travel_explore</span>
-                    TravelBlog
+                    <span className="material-symbols-outlined">public</span>
+                    TripTales
                 </Link>
 
                 <nav className="nav">
@@ -36,12 +36,12 @@ const Header = () => {
                             <Link to="/write" style={{ 
                                 display: 'flex', alignItems: 'center', gap: '5px',
                                 textDecoration: 'none', color: 'var(--color-text-main)', fontWeight: '600',
-                                fontSize: '0.95rem'
+                                fontSize: '1rem'
                             }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit_square</span>
+                                <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>edit_square</span>
                                 Write
                             </Link>
-                            <Link to="/profile" style={{ fontWeight: 'bold', color: 'var(--color-primary)', textDecoration: 'none' }}>
+                            <Link to="/profile" style={{ fontWeight: 'bold', color: 'var(--color-primary)', textDecoration: 'none', fontSize: '1rem' }}>
                                 @{username}
                             </Link>
                             <button 
@@ -49,18 +49,22 @@ const Header = () => {
                                 style={{ 
                                     background: 'none', 
                                     border: '1px solid var(--color-border)', 
-                                    padding: '8px 16px', 
+                                    padding: '8px 20px', 
                                     borderRadius: '50px',
                                     cursor: 'pointer',
                                     fontSize: '0.9rem',
-                                    color: 'var(--color-text-muted)'
+                                    color: 'var(--color-text-muted)',
+                                    fontWeight: '600'
                                 }}
                             >
                                 Log Out
                             </button>
                         </div>
                     ) : (
-                        <Link to="/login" className="btn-login">Sign In</Link>
+                        <>
+                            <Link to="/login" className="btn-secondary">Log In</Link>
+                            <Link to="/register" className="btn-primary">Sign Up</Link>
+                        </>
                     )}
                 </div>
             </div>
