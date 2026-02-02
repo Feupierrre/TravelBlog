@@ -31,7 +31,16 @@ const Header = () => {
 
                 <div className="auth-buttons">
                     {isAuthenticated ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                            
+                            <Link to="/write" style={{ 
+                                display: 'flex', alignItems: 'center', gap: '5px',
+                                textDecoration: 'none', color: 'var(--color-text-main)', fontWeight: '600',
+                                fontSize: '0.95rem'
+                            }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit_square</span>
+                                Write
+                            </Link>
                             <Link to="/profile" style={{ fontWeight: 'bold', color: 'var(--color-primary)', textDecoration: 'none' }}>
                                 @{username}
                             </Link>
@@ -43,7 +52,8 @@ const Header = () => {
                                     padding: '8px 16px', 
                                     borderRadius: '50px',
                                     cursor: 'pointer',
-                                    fontSize: '0.9rem'
+                                    fontSize: '0.9rem',
+                                    color: 'var(--color-text-muted)'
                                 }}
                             >
                                 Log Out

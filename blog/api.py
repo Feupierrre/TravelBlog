@@ -7,9 +7,68 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_jwt.authentication import JWTAuth
+from django.utils.text import slugify
+import uuid
 
 api = NinjaExtraAPI()
 api.register_controllers(NinjaJWTDefaultController)
+
+# --- POSTS ---
+
+class PostCreateSchema(Schema):
+    title: str
+    location_name: str
+
+@api.post("/posts/create", auth=JWTAuth())
+def create_post(request, payload: PostCreateSchema = Form(...), cover: UploadedFile = File(None)):
+    user = request.auth
+    
+    base_slug = slugify(payload.title)
+    unique_slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
+
+    post = Post.objects.create(
+        author=user,
+        title=payload.title,
+        slug=unique_slug,
+        location_name=payload.location_name,
+        is_published=True
+    )
+
+    if cover:
+        post.cover_image.save(cover.name, cover)
+        post.save()
+
+    all_data = {**request.POST.dict(), **request.FILES.dict()}
+    block_keys = [k for k in all_data.keys() if k.startswith('block_')]
+    block_keys.sort(key=lambda x: int(x.split('_')[1]))
+
+    for key in block_keys:
+        parts = key.split('_')
+        index = int(parts[1])
+        type_suffix = parts[2] 
+
+        if type_suffix == 'text':
+            content = all_data[key]
+            if content: 
+                PostBlock.objects.create(
+                    post=post,
+                    type='text',
+                    position=index,
+                    text_content=content
+                )
+        
+        elif type_suffix == 'image':
+            image_file = all_data[key]
+            if image_file:
+                PostBlock.objects.create(
+                    post=post,
+                    type='image',
+                    position=index,
+                    image_content=image_file
+                )
+
+    return {"slug": post.slug, "message": "Story published!"}
+
 
 class PostBlockSchema(Schema):
     type: str
@@ -80,6 +139,8 @@ def list_posts(request):
     return Post.objects.filter(is_published=True)
 
 
+# --- AUTH ---
+
 class RegisterSchema(Schema):
     username: str
     email: str
@@ -99,6 +160,8 @@ def register(request, payload: RegisterSchema):
     return {"id": user.id, "username": user.username, "message": "User created successfully"}
 
 
+# --- PROFILE & MAP ---
+
 class CountrySchema(Schema):
     country_code: str
 
@@ -114,27 +177,38 @@ class UserProfileSchema(Schema):
 
     @staticmethod
     def resolve_avatar_url(obj):
-        if hasattr(obj, 'profile') and obj.profile.avatar:
-            return obj.profile.avatar.url
+        profile = None
+        if isinstance(obj, dict):
+            profile = obj.get('profile')
+        elif hasattr(obj, 'profile'):
+            profile = obj.profile
+            
+        if profile and profile.avatar:
+            return profile.avatar.url
         return None
 
     @staticmethod
     def resolve_bio(obj):
-        if hasattr(obj, 'profile'):
-            return obj.profile.bio
+        profile = None
+        if isinstance(obj, dict):
+            profile = obj.get('profile')
+        elif hasattr(obj, 'profile'):
+            profile = obj.profile
+            
+        if profile and profile.bio:
+            return profile.bio
         return ""
 
 @api.get("/me", response=UserProfileSchema, auth=JWTAuth())
 def me(request):
     user = request.auth
-    from .models import Profile
-    Profile.objects.get_or_create(user=user)
+    profile, _ = Profile.objects.get_or_create(user=user)
 
     return {
         "id": user.id,
         "username": user.username,
         "email": user.email,
-        "profile": user.profile,
+        "profile": profile,
         "stories_count": Post.objects.filter(author=user, is_published=True).count(),
         "countries_count": VisitedCountry.objects.filter(user=user).count(),
         "visited_countries": [c.country_code for c in VisitedCountry.objects.filter(user=user)]
@@ -155,13 +229,11 @@ def update_profile(request, payload: ProfileUpdateSchema = Form(...), avatar: Up
         profile.avatar.save(avatar.name, avatar)
 
     profile.save()
-
     return me(request)
 
 @api.post("/countries", auth=JWTAuth())
 def toggle_country(request, payload: CountrySchema):
     user = request.auth
-
     country, created = VisitedCountry.objects.get_or_create(
         user=user, 
         country_code=payload.country_code
@@ -170,4 +242,3 @@ def toggle_country(request, payload: CountrySchema):
         country.delete()
         return {"status": "removed", "code": payload.country_code}
     return {"status": "added", "code": payload.country_code}
-

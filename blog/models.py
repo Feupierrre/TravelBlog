@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 class Post(models.Model):
     title = models.CharField("Heading", max_length=200)
-    slug = models.SlugField(unique=True, help_text="Post URL (Example: bali-trip)")
+    slug = models.SlugField(unique=True, max_length=300 ,help_text="Post URL (Example: bali-trip)")
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
 
     cover_image = models.ImageField("Cover", upload_to='covers/', blank=True, null=True)
