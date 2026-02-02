@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WorldMap from '../components/WorldMap';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
-    
-    // Состояния для редактирования
     const [isEditing, setIsEditing] = useState(false);
     const [bio, setBio] = useState('');
     const [avatarFile, setAvatarFile] = useState(null);
@@ -22,7 +21,7 @@ const ProfilePage = () => {
         })
         .then(data => {
             setUser(data);
-            setBio(data.bio || ''); // Заполняем био, если оно есть
+            setBio(data.bio || '');
         })
         .catch(() => {
             localStorage.removeItem('accessToken');
@@ -39,7 +38,6 @@ const ProfilePage = () => {
         fetchUserData(token);
     }, [navigate]);
 
-    // Обработка выбора файла (показываем превью сразу)
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -48,37 +46,30 @@ const ProfilePage = () => {
         }
     };
 
-    // Сохранение профиля
     const handleSave = async () => {
         const token = localStorage.getItem('accessToken');
         const formData = new FormData();
-        
         formData.append('bio', bio);
-        if (avatarFile) {
-            formData.append('avatar', avatarFile);
-        }
+        if (avatarFile) formData.append('avatar', avatarFile);
 
         try {
             const res = await fetch('http://127.0.0.1:8000/api/me/update', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
-                body: formData // 👈 Важно: отправляем как FormData (для файлов)
+                body: formData
             });
 
             if (res.ok) {
                 const updatedUser = await res.json();
                 setUser(updatedUser);
-                setIsEditing(false); // Выходим из режима редактирования
-                setAvatarFile(null); // Очищаем файл
+                setIsEditing(false);
+                setAvatarFile(null);
             } else {
-                alert("Ошибка при сохранении");
+                alert("Error saving");
             }
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     };
-    
-    // Тоггл стран (оставляем как было)
+
     const handleToggleCountry = async (countryCode) => {
         const token = localStorage.getItem('accessToken');
         try {
@@ -91,117 +82,86 @@ const ProfilePage = () => {
         } catch (err) { console.error(err); }
     };
 
-    if (!user) return <div className="container" style={{padding: '50px'}}>Loading...</div>;
+    if (!user) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1A251C', color: 'white' }}>Loading...</div>;
 
-    // Определяем URL аватарки (приоритет: превью -> с сервера -> заглушка)
     const avatarUrl = avatarPreview 
         ? avatarPreview 
         : (user.avatar_url ? `http://127.0.0.1:8000${user.avatar_url}` : null);
 
     return (
-        <div className="container" style={{ paddingBottom: '60px', paddingTop: '40px' }}>
-            
-            {/* КАРТОЧКА ПРОФИЛЯ */}
-            <div style={{ 
-                marginBottom: '40px', background: 'white', borderRadius: '16px', 
-                border: '1px solid #E8ECE8', padding: '40px',
-                display: 'flex', gap: '40px', alignItems: 'flex-start', flexWrap: 'wrap'
-            }}>
-                
-                {/* 1. АВАТАРКА */}
-                <div style={{ position: 'relative' }}>
-                    <div style={{ 
-                        width: '120px', height: '120px', borderRadius: '50%', 
-                        background: avatarUrl ? `url(${avatarUrl}) center/cover` : 'var(--color-primary)', 
-                        color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '3rem', fontWeight: '700', border: '4px solid white',
-                        boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
-                    }}>
-                        {!avatarUrl && user.username.charAt(0).toUpperCase()}
-                    </div>
-                    
-                    {/* Кнопка загрузки фото (появляется только при редактировании) */}
-                    {isEditing && (
-                        <label style={{ 
-                            position: 'absolute', bottom: '0', right: '0',
-                            background: 'var(--color-text-main)', color: 'white',
-                            width: '32px', height: '32px', borderRadius: '50%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-                        }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>photo_camera</span>
-                            <input type="file" hidden accept="image/*" onChange={handleFileChange} />
-                        </label>
-                    )}
-                </div>
-
-                {/* 2. ИНФОРМАЦИЯ */}
-                <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <h1 style={{ fontSize: '2.2rem', margin: 0 }}>{user.username}</h1>
-                        
-                        {/* КНОПКА EDIT / SAVE */}
-                        {isEditing ? (
-                            <button onClick={handleSave} style={{ 
-                                padding: '8px 20px', background: 'var(--color-primary)', color: 'white', 
-                                border: 'none', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer' 
-                            }}>
-                                Save Profile
-                            </button>
+        <div className="profile-container">
+            <div className="profile-content-wrapper">
+                <div className="profile-card">
+                    <div className="profile-avatar-wrapper">
+                        {avatarUrl ? (
+                            <img src={avatarUrl} alt="Avatar" className="profile-avatar" />
                         ) : (
-                            <button onClick={() => setIsEditing(true)} style={{ 
-                                padding: '8px 20px', background: 'white', color: 'var(--color-text-main)', 
-                                border: '1px solid #ddd', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', gap: '5px'
-                            }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span> Edit
-                            </button>
+                            <div className="profile-avatar">
+                                {user.username.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        {isEditing && (
+                            <label className="btn-upload">
+                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_camera</span>
+                                <input type="file" hidden accept="image/*" onChange={handleFileChange} />
+                            </label>
                         )}
                     </div>
 
-                    {/* Поле Bio */}
-                    {isEditing ? (
-                        <textarea 
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                            placeholder="Tell us about yourself..."
-                            style={{ 
-                                width: '100%', minHeight: '80px', padding: '10px', 
-                                borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit',
-                                fontSize: '1rem', resize: 'vertical'
-                            }}
-                        />
-                    ) : (
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', lineHeight: '1.6', maxWidth: '600px' }}>
-                            {user.bio || "No bio yet. Click edit to tell your story!"}
+                    <div className="profile-info">
+                        <div className="profile-header">
+                            <h1 className="profile-name">{user.username}</h1>
+                            {isEditing ? (
+                                <button onClick={handleSave} className="btn-edit btn-save">
+                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check</span> Save
+                                </button>
+                            ) : (
+                                <button onClick={() => setIsEditing(true)} className="btn-edit">
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span> Edit Profile
+                                </button>
+                            )}
+                        </div>
+
+                        {isEditing ? (
+                            <textarea 
+                                className="bio-input"
+                                value={bio} 
+                                onChange={(e) => setBio(e.target.value)}
+                                placeholder="Tell the world about your travels..."
+                            />
+                        ) : (
+                            <p className="profile-bio">
+                                {user.bio || "No bio yet. Tell us your story!"}
+                            </p>
+                        )}
+                        
+                        <p className="profile-email">
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>mail</span> {user.email}
                         </p>
-                    )}
-                    
-                    <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#999' }}>{user.email}</p>
+                    </div>
+
+                    <div className="profile-stats">
+                        <div className="stat-item">
+                            <span className="stat-value">{user.countries_count}</span>
+                            <span className="stat-label">Countries</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-value">{user.stories_count}</span>
+                            <span className="stat-label">Stories</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* 3. СТАТИСТИКА */}
-                <div style={{ display: 'flex', gap: '30px', borderLeft: '1px solid #eee', paddingLeft: '30px' }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <span style={{ display: 'block', fontSize: '2rem', fontWeight: '800', color: 'var(--color-text-main)' }}>
-                            {user.countries_count}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', letterSpacing: '1px' }}>COUNTRIES</span>
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <span style={{ display: 'block', fontSize: '2rem', fontWeight: '800', color: 'var(--color-text-main)' }}>
-                            {user.stories_count}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', letterSpacing: '1px' }}>STORIES</span>
-                    </div>
-                </div>
+                {/* КАРТА */}
+                <h2 className="map-section-title">
+                    My Travel Map <span style={{ fontSize: '1.5rem', marginLeft: '10px' }}>🌍</span>
+                </h2>
+                
+                <WorldMap 
+                    visitedCodes={user.visited_countries} 
+                    onCountryClick={handleToggleCountry} 
+                />
             </div>
-
-            <h2 style={{ marginBottom: '20px' }}>My Travel Map 🌍</h2>
-            <WorldMap 
-                visitedCodes={user.visited_countries} 
-                onCountryClick={handleToggleCountry} 
-            />
         </div>
     );
 };

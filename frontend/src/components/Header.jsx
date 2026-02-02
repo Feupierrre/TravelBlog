@@ -7,6 +7,9 @@ const Header = () => {
     
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
+    
+    // 🔥 Состояние для скролла
+    const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
         const handleAuthChange = () => {
@@ -14,12 +17,19 @@ const Header = () => {
             setUsername(localStorage.getItem('username'));
         };
 
+        // 🔥 Логика: если прокрутили > 50px, включаем фон
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 50);
+        };
+
         window.addEventListener('authChange', handleAuthChange);
         window.addEventListener('storage', handleAuthChange);
+        window.addEventListener('scroll', handleScroll);
 
         return () => {
             window.removeEventListener('authChange', handleAuthChange);
             window.removeEventListener('storage', handleAuthChange);
+            window.removeEventListener('scroll', handleScroll);
         };
     }, []);
 
@@ -27,13 +37,13 @@ const Header = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('username');
-        
         window.dispatchEvent(new Event("authChange"));
         navigate('/login');
     };
 
     return (
-        <header className="header">
+        // Добавляем класс 'scrolled' если страница прокручена
+        <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
             <div className="header-container">
                 <Link to="/" className="logo">
                     <span className="material-symbols-outlined">public</span>
@@ -53,9 +63,11 @@ const Header = () => {
                                 <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>edit_square</span>
                                 Write
                             </Link>
+
                             <Link to="/profile" className="link-profile">
                                 @{username}
                             </Link>
+
                             <button onClick={handleLogout} className="btn-logout">
                                 Log Out
                             </button>
