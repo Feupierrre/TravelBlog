@@ -190,9 +190,12 @@ const CreatePostPage = () => {
                         </button>
                     </div>
                     <div className="editor-footer">
-                        <button type="submit" className="btn-publish" disabled={isSubmitting}>
-                            {isSubmitting ? 'Publishing...' : 'Publish Story'}
-                        </button>
+                        <div className="footer-pill">
+                                <span>Ready to share?</span>
+                                <button type="submit" className="btn-publish" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Publishing...' : 'Publish Story'}
+                                </button>   
+                        </div>  
                     </div>
                 </form>
             </div>

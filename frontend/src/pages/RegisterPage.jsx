@@ -45,6 +45,7 @@ const RegisterPage = () => {
                             className="form-input"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Enter your username"
                             required 
                         />
                     </div>
@@ -56,6 +57,7 @@ const RegisterPage = () => {
                             className="form-input"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter your email"
                             required 
                         />
                     </div>
@@ -67,6 +69,7 @@ const RegisterPage = () => {
                             className="form-input"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
                             required 
                         />
                     </div>

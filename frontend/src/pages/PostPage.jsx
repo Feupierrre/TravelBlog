@@ -23,7 +23,7 @@ const PostPage = () => {
             });
     }, [slug]);
 
-    if (isLoading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Загрузка истории... 🌿</div>;
+    if (isLoading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading history...🌿</div>;
     if (!post) return <div className="container" style={{ padding: '40px' }}>Post was not Found😢</div>;
 
     return (
