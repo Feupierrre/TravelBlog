@@ -242,3 +242,7 @@ def toggle_country(request, payload: CountrySchema):
         country.delete()
         return {"status": "removed", "code": payload.country_code}
     return {"status": "added", "code": payload.country_code}
+
+@api.get("/my-posts", response=List[PostListSchema], auth=JWTAuth())
+def my_posts(request):
+    return Post.objects.filter(author=request.auth).order_by('-created_at')

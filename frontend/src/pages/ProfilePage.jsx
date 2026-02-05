@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { data, Link, useNavigate } from 'react-router-dom';
 import WorldMap from '../components/WorldMap';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const [myPosts, setMyPosts] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [bio, setBio] = useState('');
     const [avatarFile, setAvatarFile] = useState(null);
@@ -27,6 +28,13 @@ const ProfilePage = () => {
             localStorage.removeItem('accessToken');
             navigate('/login');
         });
+
+        fetch('http://127.0.0.1:8000/api/my-posts', {
+            headers: { 'Authorization': `Bearer ${token}` }       
+        })
+        .then(res => res.json())
+        .then(data => setMyPosts(data))
+        .catch(err => console.error("Failed to fetch posts", err));
     };
 
     useEffect(() => {
@@ -151,8 +159,6 @@ const ProfilePage = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* КАРТА */}
                 <h2 className="map-section-title">
                     My Travel Map <span style={{ fontSize: '1.5rem', marginLeft: '10px' }}>🌍</span>
                 </h2>
@@ -161,6 +167,40 @@ const ProfilePage = () => {
                     visitedCodes={user.visited_countries} 
                     onCountryClick={handleToggleCountry} 
                 />
+                <h2 className="stories-section-title">
+                    My Stories <span style={{ fontSize: '1.5 rem', marginLeft: '10px'}}>✍️</span>
+                </h2>
+                <div className="stories-grid">
+                    {myPosts.length > 0 ? (
+                        myPosts.map(post => (
+                            <Link key={post.id} to={`/post/${post.slug}`} className="story-card">
+                                {post.cover_image_url ? (
+                                    <img 
+                                        src={`http://127.0.0.1:8000${post.cover_image_url}`} 
+                                        alt={post.title} 
+                                        className="story-card-image"
+                                    />
+                                ) : (
+                                    <div className="story-card-image" style={{background: '#eee'}}></div>
+                                )}
+                                
+                                <div className="story-card-content">
+                                    <span className="story-card-tag">DESTINATION</span>
+                                    <h3 className="story-card-title">{post.title}</h3>
+                                    <div className="story-card-location">
+                                        <span className="material-symbols-outlined" style={{fontSize: '16px'}}> 📍 </span> 
+                                        {post.location_name}
+                                    </div>
+                                </div>
+                            </Link>
+                        ))
+                    ) : (
+                        <div className="no-stories-placeholder">
+                            You haven't written any stories yet. <br/>
+                            <Link to="/write" style={{color: 'var(--color-primary)', fontWeight: 'bold', marginTop: '10px', display: 'inline-block'}}>Start your first one!</Link>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
