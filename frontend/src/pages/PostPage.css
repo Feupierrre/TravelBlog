@@ -76,7 +76,7 @@
 }
 
 .post-content {
-    max-width: 740px; 
+    max-width: 800px; 
     margin: -40px auto 60px; 
     position: relative;
     z-index: 4;
@@ -85,6 +85,9 @@
     line-height: 1.8;
     font-size: 1.15rem;
     color: var(--color-text-main);
+    border: 0.5px solid #1A1A1A;
+    padding: 50px;
+
 }
 
 .post-content p {

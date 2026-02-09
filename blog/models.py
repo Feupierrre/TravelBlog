@@ -2,6 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Post(models.Model):
+
+    CONTINENT_CHOICES = [
+        ('Europe', 'Europe'),
+        ('Asia', 'Asia'),
+        ('Africa', 'Africa'),
+        ('North America', 'North America'),
+        ('South America', 'South America'),
+        ('Oceania', 'Oceania'),
+        ('Antarctica', 'Antarctica'),
+    ]
+
     title = models.CharField("Heading", max_length=200)
     slug = models.SlugField(unique=True, max_length=300 ,help_text="Post URL (Example: bali-trip)")
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
@@ -9,6 +20,13 @@ class Post(models.Model):
     cover_image = models.ImageField("Cover", upload_to='covers/', blank=True, null=True)
     location_name = models.CharField("Location", max_length=100, help_text="Example: Bali, Indonesia")
 
+    continent = models.CharField(
+        "Continent",
+        max_length=50, 
+        choices=CONTINENT_CHOICES, 
+        default='Europe'
+    )
+    
     created_at = models.DateTimeField("Created date", auto_now_add=True)
     is_published = models.BooleanField("Published", default=False)
 

@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import CreatePostPage from './pages/CreatePostPage';
 import AboutPage from './pages/AboutPage';
+import PlacesPage from './pages/PlacesPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/write" element={<CreatePostPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/places" element={<PlacesPage />} />
       </Routes>
     </>
   );

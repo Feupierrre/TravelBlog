@@ -2,13 +2,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react'; 
 import './Header.css';
 
+const CONTINENTS = [
+    'Europe', 'Asia', 'Africa', 'North America', 'South America', 'Oceania', 'Antarctica'
+];
+
 const Header = () => {
     const navigate = useNavigate();
-    
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
-    
-    // 🔥 Состояние для скролла
     const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
@@ -16,11 +17,7 @@ const Header = () => {
             setIsAuthenticated(!!localStorage.getItem('accessToken'));
             setUsername(localStorage.getItem('username'));
         };
-
-        // 🔥 Логика: если прокрутили > 50px, включаем фон
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
-        };
+        const handleScroll = () => setIsScrolled(window.scrollY > 50);
 
         window.addEventListener('authChange', handleAuthChange);
         window.addEventListener('storage', handleAuthChange);
@@ -42,7 +39,6 @@ const Header = () => {
     };
 
     return (
-        // Добавляем класс 'scrolled' если страница прокручена
         <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
             <div className="header-container">
                 <Link to="/" className="logo">
@@ -53,7 +49,20 @@ const Header = () => {
                 <nav className="nav">
                     <Link to="/" className="nav-link">Home</Link>
                     <Link to="/about" className="nav-link">About</Link>
-                    <Link to="/places" className="nav-link">Places</Link>
+                    
+                    <div className="nav-dropdown">
+                        <Link to="/places" className="nav-link dropdown-trigger">
+                            Places <span style={{fontSize: '0.8em', marginLeft: '4px'}}>►</span>
+                        </Link>
+                        
+                        <div className="dropdown-menu">
+                            {CONTINENTS.map(c => (
+                                <Link key={c} to={`/places?continent=${c}`} className="dropdown-item">
+                                    {c}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
                 </nav>
 
                 <div className="auth-buttons">

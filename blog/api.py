@@ -18,6 +18,7 @@ api.register_controllers(NinjaJWTDefaultController)
 class PostCreateSchema(Schema):
     title: str
     location_name: str
+    continent: str 
 
 @api.post("/posts/create", auth=JWTAuth())
 def create_post(request, payload: PostCreateSchema = Form(...), cover: UploadedFile = File(None)):
@@ -31,6 +32,7 @@ def create_post(request, payload: PostCreateSchema = Form(...), cover: UploadedF
         title=payload.title,
         slug=unique_slug,
         location_name=payload.location_name,
+        continent=payload.continent, 
         is_published=True
     )
 
@@ -47,7 +49,7 @@ def create_post(request, payload: PostCreateSchema = Form(...), cover: UploadedF
         index = int(parts[1])
         type_suffix = parts[2] 
 
-        if type_suffix == 'text':
+        if type_suffix == 'content': 
             content = all_data[key]
             if content: 
                 PostBlock.objects.create(
@@ -88,6 +90,7 @@ class PostDetailSchema(Schema):
     slug: str
     author: str
     location_name: str
+    continent: str 
     cover_image_url: Optional[str] = None
     created_at: str
     blocks: List[PostBlockSchema]
@@ -117,6 +120,7 @@ class PostListSchema(Schema):
     slug: str
     author: str
     location_name: str
+    continent: str  
     cover_image_url: Optional[str] = None
     created_at: str
 
@@ -135,11 +139,15 @@ class PostListSchema(Schema):
         return obj.created_at.strftime("%d %B %Y")
 
 @api.get("/posts", response=List[PostListSchema])
-def list_posts(request):
-    return Post.objects.filter(is_published=True)
+def list_posts(request, continent: str = None):
+    posts = Post.objects.filter(is_published=True)
+    if continent and continent != 'All':
+        posts = posts.filter(continent=continent)
+    return posts.order_by('-created_at')
 
-
-# --- AUTH ---
+@api.get("/my-posts", response=List[PostListSchema], auth=JWTAuth())
+def my_posts(request):
+    return Post.objects.filter(author=request.auth).order_by('-created_at')
 
 class RegisterSchema(Schema):
     username: str
@@ -158,9 +166,6 @@ def register(request, payload: RegisterSchema):
     )
 
     return {"id": user.id, "username": user.username, "message": "User created successfully"}
-
-
-# --- PROFILE & MAP ---
 
 class CountrySchema(Schema):
     country_code: str
@@ -242,7 +247,3 @@ def toggle_country(request, payload: CountrySchema):
         country.delete()
         return {"status": "removed", "code": payload.country_code}
     return {"status": "added", "code": payload.country_code}
-
-@api.get("/my-posts", response=List[PostListSchema], auth=JWTAuth())
-def my_posts(request):
-    return Post.objects.filter(author=request.auth).order_by('-created_at')

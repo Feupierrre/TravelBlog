@@ -1,10 +1,10 @@
-.create-container {
+.editor-container {
     max-width: 900px;
     margin: 0 auto;
     padding-top: 120px; 
     padding-bottom: 140px; 
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .page-header-title {
@@ -12,26 +12,24 @@
     font-family: var(--font-serif);
     font-size: 3rem;
     font-weight: 800;
-    margin-bottom: 50px;
+    margin-bottom: 20px;
     color: #1A1A1A;
-    position: relative;
-    display: inline-block;
-    left: 50%;
-    transform: translateX(-50%);
     letter-spacing: -1.5px;
 }
 
-.page-header-title::after {
-    content: '';
-    display: block;
+.title-underline {
     width: 60px;
     height: 4px;
     background: var(--color-primary);
-    margin: 10px auto 0;
+    margin: 0 auto 50px; 
     border-radius: 2px;
 }
 
-.editor-cover-upload {
+.cover-upload-wrapper {
+    margin-bottom: 50px;
+}
+
+.cover-upload-area {
     width: 100%;
     height: 400px; 
     background-color: #E8ECE8; 
@@ -43,18 +41,26 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    background-size: cover;
-    background-position: center;
     position: relative;
     overflow: hidden;
-    margin-bottom: 50px;
     box-shadow: inset 0 0 40px rgba(0,0,0,0.02);
 }
 
-.editor-cover-upload:hover {
+.cover-upload-area:hover {
     border-color: var(--color-primary);
     transform: translateY(-2px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+}
+
+.cover-upload-area.has-image {
+    border-style: solid;
+    border-color: transparent;
+}
+
+.cover-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .cover-placeholder {
@@ -69,7 +75,7 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-.meta-card {
+.editor-meta-card { 
     background: #FFFFFF;
     padding: 40px;
     border-radius: 20px;
@@ -85,18 +91,27 @@
     border-bottom: 2px solid #EEE;
     outline: none;
     font-family: var(--font-sans);
-    font-size: 2.8rem;
+    font-size: 2.5rem;
     font-weight: 800; 
     color: #1A1A1A;
     background: transparent;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
     transition: border-color 0.3s;
     letter-spacing: -1px;
 }
 .editor-title::placeholder { color: #DDD; font-weight: 700; }
+.editor-title:focus { border-bottom-color: var(--color-primary); }
 
-.editor-location {
+.meta-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
     width: 100%;
+}
+
+.location-input {
+    flex-grow: 1; 
     border: none;
     outline: none;
     font-family: var(--font-sans);
@@ -106,18 +121,42 @@
     padding: 16px 20px;
     border-radius: 12px;
     transition: all 0.2s;
-    padding-left: 45px !important; 
 }
 
-.editor-location:focus {
+.location-input:focus {
     background: white;
     box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.continent-select {
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: none;
+    background: #F8F9F8; 
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    appearance: none; 
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 10px auto;
+    padding-right: 40px;
+    min-width: 180px;
+}
+
+.continent-select:hover, .continent-select:focus {
+    background: #E8EAE8;
+    color: #1A1A1A;
 }
 
 .editor-blocks {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 .editor-block {
@@ -136,8 +175,7 @@
     transform: translateX(5px); 
 }
 
-.editor-block::before {
-    content: attr(data-index); 
+.block-number {
     position: absolute;
     left: -40px;
     top: 50%;
@@ -148,7 +186,7 @@
     font-family: var(--font-sans);
 }
 
-.editor-block:focus-within::before {
+.editor-block:focus-within .block-number {
     color: var(--color-primary); 
 }
 
@@ -184,6 +222,7 @@
     transform: scale(1.15);
     box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
 }
+
 .editor-textarea {
     width: 100%;
     min-height: 100px;
@@ -199,7 +238,7 @@
 
 .editor-image-upload {
     position: relative; 
-    min-height: 220px;
+    min-height: 250px;
     background: #F8F9F8; 
     border: 2px dashed #CCD1CD;
     border-radius: 16px;
@@ -221,11 +260,6 @@
     text-align: center;
     color: #888;
     padding: 20px;
-    transition: all 0.3s ease;
-}
-
-.editor-image-upload:hover .image-upload-placeholder {
-    color: var(--color-primary); 
 }
 
 .placeholder-icon {
@@ -245,12 +279,6 @@
     font-size: 1rem;
     font-weight: 600;
 }
-.placeholder-subtext {
-    font-size: 0.85rem;
-    font-weight: 400;
-    color: #AAA;
-    margin-top: 5px;
-}
 
 .editor-img-preview {
     width: 100%;
@@ -262,11 +290,11 @@
 
 .btn-remove-image-inside {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 32px;
-    height: 32px;
-    background: rgba(0, 0, 0, 0.5); 
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.6); 
     color: white;
     border: none;
     border-radius: 50%;
@@ -284,26 +312,27 @@
     transform: scale(1.1);
 }
 
-.editor-tools {
+.editor-controls {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-top: 40px;
-    padding: 20px;
-    background: rgba(255,255,255,0.6);
+    margin-top: 50px;
+    padding: 15px;
+    background: rgba(255,255,255,0.8);
     backdrop-filter: blur(10px);
     border-radius: 50px;
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
     border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-.btn-tool {
+.btn-add-block { 
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 24px;
+    gap: 10px;
+    padding: 12px 28px;
     border-radius: 50px;
     border: 1px solid #DDD;
     background: white;
@@ -311,9 +340,10 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 0.95rem;
 }
 
-.btn-tool:hover {
+.btn-add-block:hover {
     background: var(--color-primary);
     color: white;
     border-color: var(--color-primary);
@@ -324,8 +354,8 @@
 .editor-footer {
     position: fixed;
     bottom: 30px;
-    left: 0%;
-    right: 0%;
+    left: 0;
+    right: 0;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -358,7 +388,8 @@
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
 .btn-publish:hover {
     background: var(--color-primary-hover);
@@ -370,6 +401,7 @@
 }
 
 @media (max-width: 768px) {
-    .create-container { padding: 100px 20px 100px 20px; }
-    .editor-block::before { display: none; } 
+    .editor-container { padding-left: 15px; padding-right: 15px; }
+    .meta-row { flex-direction: column; align-items: stretch; }
+    .block-number { display: none; }
 }
