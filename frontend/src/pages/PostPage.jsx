@@ -1,85 +1,89 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import Header from '../components/Header';
 import './PostPage.css';
 
 const PostPage = () => {
     const { slug } = useParams();
     const [post, setPost] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        window.scrollTo(0, 0);   
+        setLoading(true);
         fetch(`http://127.0.0.1:8000/api/posts/${slug}`)
-            .then((res) => {
-                if (!res.ok) throw new Error("Post was not Found");
+            .then(res => {
+                if (!res.ok) throw new Error('Not found');
                 return res.json();
             })
-            .then((data) => {
+            .then(data => {
                 setPost(data);
-                setIsLoading(false);
+                setLoading(false);
             })
-            .catch((err) => {
+            .catch(err => {
                 console.error(err);
-                setIsLoading(false);
+                setLoading(false);
             });
     }, [slug]);
 
-    if (isLoading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading history...🌿</div>;
-    if (!post) return <div className="container" style={{ padding: '40px' }}>Post was not Found😢</div>;
+    if (loading) return <div style={{height: '100vh', background: '#FFF'}}></div>;
+    if (!post) return <div style={{padding: '100px', textAlign: 'center'}}>Post not found</div>;
 
     return (
-        <article>
-            <div className="post-header">
-                <div 
-                    className="post-bg" 
-                    style={{ backgroundImage: post.cover_image_url ? `url(http://127.0.0.1:8000${post.cover_image_url})` : 'none' }}
-                ></div>
-                <div className="post-overlay"></div>
-                <div className="post-title-container">
-                    <span className="post-meta-tag">Travel Story</span>
+        <div className="post-page">
+            <Header />
+            <div className="post-hero">
+                {post.cover_image_url ? (
+                    <img src={`http://127.0.0.1:8000${post.cover_image_url}`} alt={post.title} className="post-hero-bg" />
+                ) : (
+                    <div className="post-hero-bg" style={{background: '#222'}}></div>
+                )}
+                <div className="post-hero-overlay"></div>
+                <div className="post-hero-content">
+                    {post.continent && (
+                        <span className="post-continent-badge">{post.continent}</span>
+                    )}
                     <h1 className="post-title">{post.title}</h1>
-                    <div className="post-info">
-                        <span>📍 {post.location_name}</span>
+                    <div className="post-meta">
+                        <span>{post.location_name}</span>
                         <span>•</span>
-                        <span>✍️ {post.author}</span>
-                        <span>•</span>
-                        <span>📅 {post.created_at}</span>
+                        <span>{post.created_at}</span>
                     </div>
                 </div>
             </div>
-            <div className="container">
-                <div className="post-content">
-                    <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '30px' }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
-                        Back to Journal
-                    </Link>
-                    
-                    {post.blocks.map((block, index) => {
-                        if (block.type === "text") {
-                            return (
-                                <p key={index}>
-                                    {block.text_content}
-                                </p>
-                            );
-                        }
-                        if (block.type === "image") {
-                            return (
+            <div className="post-content-container">
+                {post.blocks.map((block) => (
+                    <div key={block.id || Math.random()} className="content-block">
+                        {block.type === 'text' && (
+                            <div className="text-block">
+                                {block.text_content}
+                            </div>
+                        )}
+                        {block.type === 'image' && block.image_url && (
+                            <div className="image-block">
                                 <img 
-                                    key={index}
-                                    src={`http://127.0.0.1:8000${block.image_url}`}
-                                    alt="Detail"
+                                    src={`http://127.0.0.1:8000${block.image_url}`} 
+                                    alt="Story moment" 
                                     className="post-image"
                                 />
-                            );
-                        }
-                        return null;
-                    })}
-
-                    <div style={{ marginTop: '60px', paddingTop: '20px', borderTop: '1px solid var(--color-border)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                        Written by {post.author}
+                            </div>
+                        )}
+                    </div>
+                ))}
+                <div className="author-box">
+                    <div style={{
+                        width: '70px', height: '70px', background: '#F0F0F0', borderRadius: '50%', 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 'bold', color: '#888'
+                    }}>
+                        {post.author.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#999', fontWeight: '700', letterSpacing: '1px'}}>Written by</div>
+                        <div style={{fontSize: '1.4rem', fontWeight: '800', color: '#1A1A1A'}}>{post.author}</div>
                     </div>
                 </div>
             </div>
-        </article>
+        </div>
     );
 };
 

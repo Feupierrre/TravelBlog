@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react'; 
 import './Header.css';
 
@@ -8,9 +8,13 @@ const CONTINENTS = [
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
     const [isScrolled, setIsScrolled] = useState(false);
+    const lightPages = ['/places', '/write', '/about', '/login', '/register']; 
+    const isLightMode = lightPages.some(path => location.pathname.startsWith(path));
 
     useEffect(() => {
         const handleAuthChange = () => {
@@ -37,9 +41,10 @@ const Header = () => {
         window.dispatchEvent(new Event("authChange"));
         navigate('/login');
     };
+    const headerClass = `header ${isScrolled ? 'scrolled' : ''} ${isLightMode && !isScrolled ? 'light-mode' : ''}`;
 
     return (
-        <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
+        <header className={headerClass}>
             <div className="header-container">
                 <Link to="/" className="logo">
                     <span className="material-symbols-outlined">public</span>
@@ -52,9 +57,8 @@ const Header = () => {
                     
                     <div className="nav-dropdown">
                         <Link to="/places" className="nav-link dropdown-trigger">
-                            Places <span style={{fontSize: '0.8em', marginLeft: '4px'}}>►</span>
+                            Places <span style={{fontSize: '0.8em', marginLeft: '4px'}}>▼</span>
                         </Link>
-                        
                         <div className="dropdown-menu">
                             {CONTINENTS.map(c => (
                                 <Link key={c} to={`/places?continent=${c}`} className="dropdown-item">

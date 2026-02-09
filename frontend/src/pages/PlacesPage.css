@@ -2,7 +2,15 @@
     padding-top: 130px; 
     padding-bottom: 80px;
     min-height: 100vh;
-    background: #F2F4F2; 
+    background: #F4F7F4; 
+}
+
+.places-hero {
+    text-align: center;
+    padding: 60px 20px;
+    border-radius: 20px;
+    margin: 20px auto 50px;
+    max-width: 1360px; 
 }
 
 .places-content {
@@ -18,21 +26,21 @@
 
 .places-title {
     font-family: var(--font-sans);
-    font-size: 4.5rem;
+    font-size: 3rem;
     font-weight: 800;
-    letter-spacing: -2.5px;
     color: #1A1A1A;
-    margin-bottom: 15px;
-    line-height: 1;
-    text-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+    letter-spacing: -1px;
 }
+
 
 .places-subtitle {
     font-family: var(--font-serif);
-    font-size: 1.5rem;
-    color: #555;
+    font-size: 1.2rem;
+    color: #666;
     font-style: italic;
-    opacity: 0.8;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .filters-wrapper {

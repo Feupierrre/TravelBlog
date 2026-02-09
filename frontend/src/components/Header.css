@@ -264,3 +264,42 @@
 .header.scrolled .dropdown-menu {
     border: 1px solid rgba(0,0,0,0.05);
 }
+
+.header.light-mode {
+    background: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.header.light-mode .logo,
+.header.light-mode .nav-link,
+.header.light-mode .link-write,
+.header.light-mode .link-profile {
+    color: #1A1A1A; 
+    text-shadow: none;
+}
+
+.header.light-mode .btn-secondary {
+    border-color: #CCC;
+    color: #333;
+    background: transparent;
+}
+.header.light-mode .btn-secondary:hover {
+    background: #F0F0F0;
+}
+
+.header.light-mode .btn-logout {
+    border-color: #DDD;
+    color: #555;
+}
+.header.light-mode .btn-logout:hover {
+    color: #D32F2F;
+    border-color: #D32F2F;
+}
+
+.header.scrolled .logo,
+.header.scrolled .nav-link,
+.header.scrolled .link-write,
+.header.scrolled .link-profile {
+    color: #1A1A1A;
+    text-shadow: none;
+}

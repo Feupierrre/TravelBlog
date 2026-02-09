@@ -1,20 +1,18 @@
-/* frontend/src/pages/AboutPage.css */
 
 .about-container {
     padding-top: 120px;
     padding-bottom: 100px;
     min-height: 100vh;
-    background-color: #F2F4F2;
+    background-color: #F4F7F4;
     color: #1A1A1A;
 }
 
 .about-content-wrapper {
-    max-width: 1200px; /* Увеличили общий контейнер */
+    max-width: 1200px; 
     margin: 0 auto;
     padding: 0 20px;
 }
 
-/* --- ЗАГОЛОВОК --- */
 .about-header {
     text-align: center;
     margin-bottom: 50px;
@@ -41,16 +39,15 @@
     opacity: 0.8;
 }
 
-/* --- ФОТО (Сделали больше) --- */
 .about-hero-image-wrapper {
     width: 100%;
-    height: 650px; /* 🔥 Было 550px, стало выше */
+    height: 650px; 
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 25px 50px rgba(0,0,0,0.15);
     position: relative;
     z-index: 1;
-    border: 0.5px solid #1A1A1A; /* Добавили рамку и картинке для стиля */
+    border: 0.5px solid #1A1A1A;
 }
 
 .about-hero-image {
@@ -65,17 +62,13 @@
     transform: scale(1.05);
 }
 
-/* --- ТЕКСТОВЫЙ БЛОК (Сделали шире и с рамкой) --- */
 .about-text-body {
-    max-width: 900px; /* 🔥 Было 800px, стало шире */
-    margin: -70px auto 0; /* Чуть сильнее наезжает на фото */
+    max-width: 900px; 
+    margin: -70px auto 0; 
     background: #FFFFFF;
-    padding: 70px; /* Больше воздуха внутри */
+    padding: 70px; 
     border-radius: 24px;
-    
-    /* 🔥 Черная обводка */
     border: 0.5px solid #1A1A1A; 
-    
     box-shadow: 0 15px 40px rgba(0,0,0,0.1);
     position: relative;
     z-index: 10;
@@ -112,18 +105,17 @@
     height: 36px;
     background: var(--color-primary);
     border-radius: 4px;
-    border: 1px solid #1A1A1A; /* Рамка для декоративного элемента */
+    border: 1px solid #1A1A1A; 
 }
 
 .text-section p {
     font-family: var(--font-serif);
-    font-size: 1.3rem; /* Чуть крупнее шрифт для широкого блока */
+    font-size: 1.3rem; 
     line-height: 1.8;
     color: #333;
     margin-bottom: 25px;
 }
 
-/* Буквица */
 .text-section:first-child p:first-of-type::first-letter {
     float: left;
     font-family: var(--font-sans);
@@ -133,7 +125,7 @@
     color: var(--color-primary);
     margin-right: 15px;
     margin-top: 8px;
-    text-shadow: 2px 2px 0px #1A1A1A; /* Стильная тень для буквицы */
+    text-shadow: 2px 2px 0px #1A1A1A; 
 }
 
 /* Список */
@@ -144,7 +136,7 @@
     background: #F9F9F9;
     padding: 40px;
     border-radius: 16px;
-    border: 0.5px solid #1A1A1A; /* Тоже в рамку */
+    border: 0.5px solid #1A1A1A; 
 }
 
 .about-list li {
@@ -178,7 +170,6 @@
     font-weight: bold;
 }
 
-/* Адаптив */
 @media (max-width: 900px) {
     .about-title { font-size: 3rem; }
     .about-hero-image-wrapper { height: 400px; }
