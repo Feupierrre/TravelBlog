@@ -9,6 +9,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_jwt.authentication import JWTAuth
 from django.utils.text import slugify
 import uuid
+import json
 
 api = NinjaExtraAPI()
 api.register_controllers(NinjaJWTDefaultController)
@@ -208,7 +209,6 @@ class UserProfileSchema(Schema):
 def me(request):
     user = request.auth
     profile, _ = Profile.objects.get_or_create(user=user)
-
     return {
         "id": user.id,
         "username": user.username,
@@ -226,13 +226,10 @@ class ProfileUpdateSchema(Schema):
 def update_profile(request, payload: ProfileUpdateSchema = Form(...), avatar: UploadedFile = File(None)):
     user = request.auth
     profile, _ = Profile.objects.get_or_create(user=user)
-
     if payload.bio is not None:
         profile.bio = payload.bio
-
     if avatar:
         profile.avatar.save(avatar.name, avatar)
-
     profile.save()
     return me(request)
 
@@ -241,9 +238,81 @@ def toggle_country(request, payload: CountrySchema):
     user = request.auth
     country, created = VisitedCountry.objects.get_or_create(
         user=user, 
-        country_code=payload.country_code
-    )
+        country_code=payload.country_code)
     if not created:
         country.delete()
         return {"status": "removed", "code": payload.country_code}
     return {"status": "added", "code": payload.country_code}
+
+@api.delete("/posts/{slug}", auth=JWTAuth())
+def delete_post(request, slug: str):
+    post = get_object_or_404(Post, slug=slug)
+    
+    if post.author != request.auth:
+        return api.create_response(request, {"message": "Forbidden"}, status=403)
+        
+    post.delete()
+    return {"success": True}
+
+@api.post("/posts/{slug}/update", auth=JWTAuth())
+def update_post(request, slug: str, payload: PostCreateSchema = Form(...), 
+                blocks_data: str = Form(...), 
+                cover: UploadedFile = File(None)):
+    
+    post = get_object_or_404(Post, slug=slug)
+    
+    if post.author != request.auth:
+        return api.create_response(request, {"message": "Forbidden"}, status=403)
+
+    post.title = payload.title
+    post.location_name = payload.location_name
+    post.continent = payload.continent
+    
+    if cover:
+        post.cover_image.save(cover.name, cover)
+    
+    post.save()
+    PostBlock.objects.filter(post=post).delete()
+
+    try:
+        blocks_list = json.loads(blocks_data)
+    except json.JSONDecodeError:
+        return api.create_response(request, {"message": "Invalid blocks data"}, status=400)
+
+    for index, block_info in enumerate(blocks_list):
+        b_type = block_info.get('type')
+        
+        if b_type == 'text':
+            content = block_info.get('content')
+            if content:
+                PostBlock.objects.create(
+                    post=post,
+                    type='text',
+                    position=index,
+                    text_content=content
+                )
+        
+        elif b_type == 'image':
+            file_key = f'block_image_{index}'
+            image_file = request.FILES.get(file_key)
+            existing_url = block_info.get('existing_url')
+
+            if image_file:
+                PostBlock.objects.create(
+                    post=post,
+                    type='image',
+                    position=index,
+                    image_content=image_file
+                )
+            elif existing_url:
+                if '/media/' in existing_url:
+                    relative_path = existing_url.split('/media/')[1]
+                    PostBlock.objects.create(
+                        post=post,
+                        type='image',
+                        position=index,
+                        image_content=relative_path
+                    )
+
+    return {"slug": post.slug, "message": "Story updated!"}
+

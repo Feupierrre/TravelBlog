@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import './CreatePostPage.css';
 
@@ -9,6 +9,9 @@ const CONTINENTS = [
 
 const CreatePostPage = () => {
     const navigate = useNavigate();
+    const { slug } = useParams();
+    const isEditMode = !!slug;
+
     const [title, setTitle] = useState('');
     const [locationName, setLocationName] = useState('');
     const [continent, setContinent] = useState('Europe'); 
@@ -16,17 +19,65 @@ const CreatePostPage = () => {
     const [coverPreview, setCoverPreview] = useState(null);
     
     const [blocks, setBlocks] = useState([
-        { id: 1, type: 'text', content: '' }, 
-        { id: 2, type: 'image', file: null, preview: null }
+        { id: 'init-1', type: 'text', content: '' }, 
+        { id: 'init-2', type: 'image', file: null, preview: null }
     ]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+
+        const token = localStorage.getItem('accessToken');
+        const currentUser = localStorage.getItem('username');
+        if (!token){
+            navigate('/login');
+            return;
+        }
+
+        if (isEditMode) {
+            setIsLoading(true);
+            fetch(`http://127.0.0.1:8000/api/posts/${slug}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Post not found");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.author !== currentUser){
+                        alert("You don't have permission to edit this story")
+                        navigate('/')
+                        return;
+                    }
+
+                    setTitle(data.title);
+                    setLocationName(data.location_name);
+                    setContinent(data.continent);
+                    if (data.cover_image_url) {
+                        setCoverPreview(`http://127.0.0.1:8000${data.cover_image_url}`);
+                    }
+                    
+                    const loadedBlocks = data.blocks.map((b, index) => ({
+                        id: `server-${b.id}-${index}`, 
+                        type: b.type,
+                        content: b.text_content || '',
+                        preview: b.image_url ? `http://127.0.0.1:8000${b.image_url}` : null,
+                        file: null
+                    }));
+                    setBlocks(loadedBlocks);
+                    setIsLoading(false);
+                })
+                .catch(err => {
+                    console.error(err);
+                    navigate('/');
+                });
+        }
+    }, [isEditMode, slug, navigate]);
 
     const addTextBlock = () => {
-        setBlocks([...blocks, { id: Date.now(), type: 'text', content: '' }]);
+        setBlocks([...blocks, { id: `new-text-${Date.now()}`, type: 'text', content: '' }]);
     };
 
     const addImageBlock = () => {
-        setBlocks([...blocks, { id: Date.now(), type: 'image', file: null, preview: null }]);
+        setBlocks([...blocks, { id: `new-img-${Date.now()}`, type: 'image', file: null, preview: null }]);
     };
 
     const updateTextBlock = (id, text) => {
@@ -63,20 +114,40 @@ const CreatePostPage = () => {
         formData.append('title', title);
         formData.append('location_name', locationName);
         formData.append('continent', continent); 
-        if (coverImage) formData.append('cover', coverImage);
+        
+        if (coverImage) {
+            formData.append('cover', coverImage);
+        }
+
+        const blocksStructure = blocks.map(block => ({
+            type: block.type,
+            content: block.type === 'text' ? block.content : null,
+            existing_url: (block.type === 'image' && block.preview && !block.file) ? block.preview : null
+        }));
+
+        formData.append('blocks_data', JSON.stringify(blocksStructure));
+
         blocks.forEach((block, index) => {
-            formData.append(`block_${index}_type`, block.type);
-            if (block.type === 'text') {
-                formData.append(`block_${index}_content`, block.content);
-            } else if (block.type === 'image' && block.file) {
-                formData.append(`block_${index}_image`, block.file);
+            if (block.type === 'image' && block.file) {
+                formData.append(`block_image_${index}`, block.file);
             }
         });
 
         const token = localStorage.getItem('accessToken');
+        const url = isEditMode 
+            ? `http://127.0.0.1:8000/api/posts/${slug}/update`
+            : 'http://127.0.0.1:8000/api/posts/create';    
         
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/posts/create', {
+            if (!isEditMode) {
+                blocks.forEach((block, index) => {
+                    formData.append(`block_${index}_type`, block.type);
+                    if (block.type === 'text') formData.append(`block_${index}_content`, block.content);
+                    if (block.type === 'image' && block.file) formData.append(`block_${index}_image`, block.file);
+                });
+            }
+
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
@@ -86,7 +157,8 @@ const CreatePostPage = () => {
                 const data = await res.json();
                 navigate(`/post/${data.slug}`);
             } else {
-                alert('Error publishing story');
+                const errData = await res.json();
+                alert(`Error saving story: ${errData.message || 'Unknown error'}`);
             }
         } catch (err) {
             console.error(err);
@@ -96,13 +168,17 @@ const CreatePostPage = () => {
         }
     };
 
+    if (isLoading) return <div style={{paddingTop: '120px', textAlign: 'center'}}>Loading editor...</div>;
+
     return (
         <div className="editor-container">
             <Header />
 
             <form onSubmit={handlePublish} className="editor-form">
                 
-                <h1 className="page-header-title">Write a New Story ✍️</h1>
+                <h1 className="page-header-title">
+                    {isEditMode ? 'Edit Story ✏️' : 'Write a New Story ✍️'}
+                </h1>
                 <div className="title-underline"></div>
 
                 <div className="cover-upload-wrapper">
@@ -218,9 +294,9 @@ const CreatePostPage = () => {
                 </div>
                 <div className="editor-footer">
                     <div className="footer-pill">
-                        <span>Ready to share?</span>
+                        <span>{isEditMode ? 'Finished editing?' : 'Ready to share?'}</span>
                         <button type="submit" className="btn-publish" disabled={isSubmitting}>
-                            {isSubmitting ? 'Publishing...' : 'Publish Story'}
+                            {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Story' : 'Publish Story')}
                         </button>
                     </div>
                 </div>

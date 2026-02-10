@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import './PostPage.css';
 
@@ -7,6 +7,7 @@ const PostPage = () => {
     const { slug } = useParams();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
+    const currentUser = localStorage.getItem('username');
 
     useEffect(() => {
         window.scrollTo(0, 0);   
@@ -29,6 +30,8 @@ const PostPage = () => {
     if (loading) return <div style={{height: '100vh', background: '#FFF'}}></div>;
     if (!post) return <div style={{padding: '100px', textAlign: 'center'}}>Post not found</div>;
 
+    const isAuthor = currentUser === post.author;
+
     return (
         <div className="post-page">
             <Header />
@@ -49,8 +52,16 @@ const PostPage = () => {
                         <span>•</span>
                         <span>{post.created_at}</span>
                     </div>
+
+                    {isAuthor && (
+                        <Link to={`/edit/${post.slug}`} className="btn-edit-post">
+                            <span className="material-symbols-outlined" style={{fontSize: '18px'}}>edit</span>
+                            Edit Story
+                        </Link>
+                    )}
                 </div>
             </div>
+            
             <div className="post-content-container">
                 {post.blocks.map((block) => (
                     <div key={block.id || Math.random()} className="content-block">

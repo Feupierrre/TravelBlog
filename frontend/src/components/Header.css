@@ -265,33 +265,34 @@
     border: 1px solid rgba(0,0,0,0.05);
 }
 
-.header.light-mode {
+
+.header.light-mode:not(.scrolled) {
     background: transparent;
     border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
-.header.light-mode .logo,
-.header.light-mode .nav-link,
-.header.light-mode .link-write,
-.header.light-mode .link-profile {
+.header.light-mode:not(.scrolled) .logo,
+.header.light-mode:not(.scrolled) .nav-link,
+.header.light-mode:not(.scrolled) .link-write,
+.header.light-mode:not(.scrolled) .link-profile {
     color: #1A1A1A; 
     text-shadow: none;
 }
 
-.header.light-mode .btn-secondary {
+.header.light-mode:not(.scrolled) .btn-secondary {
     border-color: #CCC;
     color: #333;
     background: transparent;
 }
-.header.light-mode .btn-secondary:hover {
+.header.light-mode:not(.scrolled) .btn-secondary:hover {
     background: #F0F0F0;
 }
 
-.header.light-mode .btn-logout {
+.header.light-mode:not(.scrolled) .btn-logout {
     border-color: #DDD;
     color: #555;
 }
-.header.light-mode .btn-logout:hover {
+.header.light-mode:not(.scrolled) .btn-logout:hover {
     color: #D32F2F;
     border-color: #D32F2F;
 }

@@ -20,6 +20,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/write" element={<CreatePostPage />} />
+        <Route path="/edit/:slug" element={<CreatePostPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/places" element={<PlacesPage />} />
       </Routes>

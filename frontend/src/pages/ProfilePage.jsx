@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { data, Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import WorldMap from '../components/WorldMap';
 import './ProfilePage.css';
 
@@ -90,6 +90,29 @@ const ProfilePage = () => {
         } catch (err) { console.error(err); }
     };
 
+    const handleDelete = async (e, slug) => {
+        e.preventDefault(); 
+        if(!window.confirm("Are you sure you want to delete this story?")) return;
+
+        const token = localStorage.getItem('accessToken');
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/posts/${slug}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setMyPosts(myPosts.filter(p => p.slug !== slug));
+                setUser(prev => ({...prev, stories_count: prev.stories_count - 1}));
+            } else {
+                alert("Failed to delete post");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Network error");
+        }
+    };
+
     if (!user) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1A251C', color: 'white' }}>Loading...</div>;
 
     const avatarUrl = avatarPreview 
@@ -159,6 +182,7 @@ const ProfilePage = () => {
                         </div>
                     </div>
                 </div>
+                
                 <h2 className="map-section-title">
                     My Travel Map <span style={{ fontSize: '1.5rem', marginLeft: '10px' }}>🌍</span>
                 </h2>
@@ -167,13 +191,33 @@ const ProfilePage = () => {
                     visitedCodes={user.visited_countries} 
                     onCountryClick={handleToggleCountry} 
                 />
+                
                 <h2 className="stories-section-title">
-                    My Stories <span style={{ fontSize: '1.5 rem', marginLeft: '10px'}}>✍️</span>
+                    My Stories <span style={{ fontSize: '1.5rem', marginLeft: '10px'}}>✍️</span>
                 </h2>
+                
                 <div className="stories-grid">
                     {myPosts.length > 0 ? (
                         myPosts.map(post => (
-                            <Link key={post.id} to={`/post/${post.slug}`} className="story-card">
+                            <Link key={post.id} to={`/post/${post.slug}`} className="story-card" style={{position: 'relative'}}>
+                                
+                                <button 
+                                    className="card-action-btn btn-card-edit"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        navigate(`/edit/${post.slug}`);
+                                    }}
+                                    title="Edit story"
+                                >
+                                    <span className="material-symbols-outlined" style={{fontSize: '18px'}}>edit</span>
+                                </button>
+                                <button 
+                                    className="card-action-btn btn-card-delete"
+                                    onClick={(e) => handleDelete(e, post.slug)}
+                                    title="Delete story"
+                                >
+                                    <span className="material-symbols-outlined" style={{fontSize: '18px'}}>delete</span>
+                                </button>
                                 {post.cover_image_url ? (
                                     <img 
                                         src={`http://127.0.0.1:8000${post.cover_image_url}`} 
