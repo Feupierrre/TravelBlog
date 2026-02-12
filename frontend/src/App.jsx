@@ -8,22 +8,26 @@ import ProfilePage from './pages/ProfilePage';
 import CreatePostPage from './pages/CreatePostPage';
 import AboutPage from './pages/AboutPage';
 import PlacesPage from './pages/PlacesPage';
+import Footer from './components/footer';
 
 function App() {
   return (
     <>
       <Header />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/post/:slug" element={<PostPage />} />
-        <Route path="/login" element={<LoginPage />} />      
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/write" element={<CreatePostPage />} />
-        <Route path="/edit/:slug" element={<CreatePostPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/places" element={<PlacesPage />} />
-      </Routes>
+      <div style={{ minHeight: '80vh' }}> 
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/post/:slug" element={<PostPage />} />
+          <Route path="/login" element={<LoginPage />} />      
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/write" element={<CreatePostPage />} />
+          <Route path="/edit/:slug" element={<CreatePostPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/places" element={<PlacesPage />} />
+        </Routes>
+      </div>
+      <Footer />
     </>
   );
 }

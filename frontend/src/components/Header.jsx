@@ -13,7 +13,7 @@ const Header = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
     const [isScrolled, setIsScrolled] = useState(false);
-    const lightPages = ['/places', '/write', '/about', '/login', '/register']; 
+    const lightPages = ['/places', '/write', '/about']; 
     const isLightMode = lightPages.some(path => location.pathname.startsWith(path));
 
     useEffect(() => {
