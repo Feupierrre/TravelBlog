@@ -42,7 +42,7 @@ def create_post(request, payload: PostCreateSchema = Form(...), cover: UploadedF
         post.save()
 
     all_data = {**request.POST.dict(), **request.FILES.dict()}
-    block_keys = [k for k in all_data.keys() if k.startswith('block_')]
+    block_keys = [k for k in all_data.keys() if k.startswith('block_') and k.split('_')[1].isdigit()]
     block_keys.sort(key=lambda x: int(x.split('_')[1]))
 
     for key in block_keys:
