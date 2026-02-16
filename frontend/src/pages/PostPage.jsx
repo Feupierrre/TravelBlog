@@ -47,6 +47,7 @@ const PostPage = () => {
                         <span className="post-continent-badge">{post.continent}</span>
                     )}
                     <h1 className="post-title">{post.title}</h1>
+                    
                     <div className="post-meta">
                         <Link 
                             to={`/user/${post.author}`} 
@@ -68,9 +69,8 @@ const PostPage = () => {
                     )}
                 </div>
             </div>
-            
             <div className="post-content-container">
-                {post.blocks.map((block) => ( 
+                {post.blocks.map((block) => (
                     <div key={block.id || Math.random()} className="content-block">
                         {block.type === 'text' && (
                             <div className="text-block" style={{whiteSpace: 'pre-line'}}>
@@ -88,19 +88,24 @@ const PostPage = () => {
                         )}
                     </div>
                 ))}
-                <Link to={`/user/${post.author}`} className="author-box" style={{textDecoration: 'none', cursor: 'pointer', display: 'flex'}}>
-                    <div style={{
-                        width: '70px', height: '70px', background: '#F0F0F0', borderRadius: '50%', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 'bold', color: '#888',
-                        marginRight: '15px' 
-                    }}>
-                        {post.author.charAt(0).toUpperCase()}
+                <Link to={`/user/${post.author}`} className="author-box">
+                    <div className="author-avatar-wrapper">
+                        {post.author_avatar_url ? (
+                            <img 
+                                src={`http://127.0.0.1:8000${post.author_avatar_url}`} 
+                                alt={post.author} 
+                                className="author-avatar-img"
+                            />
+                        ) : (
+                            post.author.charAt(0).toUpperCase()
+                        )}
                     </div>
-                    <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                        <div style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#999', fontWeight: '700', letterSpacing: '1px'}}>Written by</div>
-                        <div style={{fontSize: '1.4rem', fontWeight: '800', color: '#1A1A1A'}}>@{post.author}</div>
+                    <div className="author-info">
+                        <div className="author-label">Written by</div>
+                        <div className="author-name">@{post.author}</div>
                     </div>
                 </Link>
+
             </div>
         </div>
     );

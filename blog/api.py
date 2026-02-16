@@ -14,7 +14,6 @@ import json
 api = NinjaExtraAPI()
 api.register_controllers(NinjaJWTDefaultController)
 
-# --- POSTS ---
 
 class PostCreateSchema(Schema):
     title: str
@@ -72,7 +71,6 @@ def create_post(request, payload: PostCreateSchema = Form(...), cover: UploadedF
 
     return {"slug": post.slug, "message": "Story published!"}
 
-
 class PostBlockSchema(Schema):
     type: str
     position: int
@@ -84,7 +82,7 @@ class PostBlockSchema(Schema):
         if obj.image_content:
             return obj.image_content.url
         return None
-    
+
 class PostDetailSchema(Schema):
     id: int
     title: str
@@ -95,6 +93,7 @@ class PostDetailSchema(Schema):
     cover_image_url: Optional[str] = None
     created_at: str
     blocks: List[PostBlockSchema]
+    author_avatar_url: Optional[str] = None
 
     @staticmethod
     def resolve_author(obj):
@@ -109,6 +108,12 @@ class PostDetailSchema(Schema):
     @staticmethod
     def resolve_created_at(obj):
         return obj.created_at.strftime("%d %B %Y")
+    
+    @staticmethod
+    def resolve_author_avatar_url(obj):
+        if hasattr(obj.author, 'profile') and obj.author.profile.avatar:
+            return obj.author.profile.avatar.url
+        return None
 
 @api.get("/posts/{slug}", response=PostDetailSchema)
 def get_post(request, slug:str):
@@ -138,8 +143,6 @@ class PostListSchema(Schema):
     @staticmethod
     def resolve_created_at(obj):
         return obj.created_at.strftime("%d %B %Y")
-
-# --- AUTH & USER ---
 
 class RegisterSchema(Schema):
     username: str
@@ -306,8 +309,6 @@ def update_post(request, slug: str, payload: PostCreateSchema = Form(...),
                     )
 
     return {"slug": post.slug, "message": "Story updated!"}
-
-# --- PUBLIC PROFILE ---
 
 class PublicProfileSchema(Schema):
     username: str
