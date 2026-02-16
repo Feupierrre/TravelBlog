@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import CreatePostPage from './pages/CreatePostPage';
 import AboutPage from './pages/AboutPage';
 import PlacesPage from './pages/PlacesPage';
+import PublicProfilePage from './pages/PublicProfilePage';
 import Footer from './components/footer';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/edit/:slug" element={<CreatePostPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/places" element={<PlacesPage />} />
+          <Route path="/user/:username" element={<PublicProfilePage />} />
         </Routes>
       </div>
       <Footer />

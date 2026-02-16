@@ -48,9 +48,16 @@ const PostPage = () => {
                     )}
                     <h1 className="post-title">{post.title}</h1>
                     <div className="post-meta">
-                        <span>{post.location_name}</span>
+                        <Link 
+                            to={`/user/${post.author}`} 
+                            style={{color: '#fff', fontWeight: 'bold', textDecoration: 'none', marginRight: '10px'}}
+                        >
+                            By @{post.author}
+                        </Link>
                         <span>•</span>
-                        <span>{post.created_at}</span>
+                        <span style={{margin: '0 10px'}}>{post.location_name}</span>
+                        <span>•</span>
+                        <span style={{marginLeft: '10px'}}>{post.created_at}</span>
                     </div>
 
                     {isAuthor && (
@@ -63,17 +70,17 @@ const PostPage = () => {
             </div>
             
             <div className="post-content-container">
-                {post.blocks.map((block) => (
+                {post.blocks.map((block) => ( 
                     <div key={block.id || Math.random()} className="content-block">
                         {block.type === 'text' && (
-                            <div className="text-block">
+                            <div className="text-block" style={{whiteSpace: 'pre-line'}}>
                                 {block.text_content}
                             </div>
                         )}
-                        {block.type === 'image' && block.image_url && (
+                        {block.type === 'image' && (block.image_url || block.image_content) && (
                             <div className="image-block">
                                 <img 
-                                    src={`http://127.0.0.1:8000${block.image_url}`} 
+                                    src={block.image_url ? `http://127.0.0.1:8000${block.image_url}` : `http://127.0.0.1:8000${block.image_content}`} 
                                     alt="Story moment" 
                                     className="post-image"
                                 />
@@ -81,18 +88,19 @@ const PostPage = () => {
                         )}
                     </div>
                 ))}
-                <div className="author-box">
+                <Link to={`/user/${post.author}`} className="author-box" style={{textDecoration: 'none', cursor: 'pointer', display: 'flex'}}>
                     <div style={{
                         width: '70px', height: '70px', background: '#F0F0F0', borderRadius: '50%', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 'bold', color: '#888'
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 'bold', color: '#888',
+                        marginRight: '15px' 
                     }}>
                         {post.author.charAt(0).toUpperCase()}
                     </div>
-                    <div>
+                    <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                         <div style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#999', fontWeight: '700', letterSpacing: '1px'}}>Written by</div>
-                        <div style={{fontSize: '1.4rem', fontWeight: '800', color: '#1A1A1A'}}>{post.author}</div>
+                        <div style={{fontSize: '1.4rem', fontWeight: '800', color: '#1A1A1A'}}>@{post.author}</div>
                     </div>
-                </div>
+                </Link>
             </div>
         </div>
     );

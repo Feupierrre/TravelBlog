@@ -139,16 +139,7 @@ class PostListSchema(Schema):
     def resolve_created_at(obj):
         return obj.created_at.strftime("%d %B %Y")
 
-@api.get("/posts", response=List[PostListSchema])
-def list_posts(request, continent: str = None):
-    posts = Post.objects.filter(is_published=True)
-    if continent and continent != 'All':
-        posts = posts.filter(continent=continent)
-    return posts.order_by('-created_at')
-
-@api.get("/my-posts", response=List[PostListSchema], auth=JWTAuth())
-def my_posts(request):
-    return Post.objects.filter(author=request.auth).order_by('-created_at')
+# --- AUTH & USER ---
 
 class RegisterSchema(Schema):
     username: str
@@ -316,3 +307,56 @@ def update_post(request, slug: str, payload: PostCreateSchema = Form(...),
 
     return {"slug": post.slug, "message": "Story updated!"}
 
+# --- PUBLIC PROFILE ---
+
+class PublicProfileSchema(Schema):
+    username: str
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    stories_count: int
+    countries_count: int 
+    visited_countries: List[str]
+
+    @staticmethod
+    def resolve_avatar_url(obj):
+        profile = obj.get('profile') if isinstance(obj, dict) else getattr(obj, 'profile', None)
+        
+        if profile and hasattr(profile, 'avatar') and profile.avatar:
+            return profile.avatar.url
+        return None
+    
+    @staticmethod
+    def resolve_bio(obj):
+        profile = obj.get('profile') if isinstance(obj, dict) else getattr(obj, 'profile', None)
+        
+        if profile and hasattr(profile, 'bio') and profile.bio:
+            return profile.bio
+        return ""
+
+@api.get("/users/{username}", response=PublicProfileSchema)
+def get_user_profile(request, username: str):
+    user = get_object_or_404(User, username=username)
+    profile = Profile.objects.filter(user=user).first()
+    stories_count = Post.objects.filter(author=user, is_published=True).count()
+    countries_count = VisitedCountry.objects.filter(user=user).count()
+    visited_countries_list = [c.country_code for c in VisitedCountry.objects.filter(user=user)]
+    return {
+        "username": user.username,
+        "profile": profile,  
+        "stories_count": stories_count,
+        "countries_count": countries_count,
+        "visited_countries": visited_countries_list
+    }
+
+@api.get("/posts", response=List[PostListSchema])
+def list_posts(request, continent: str = None, author: str = None):
+    posts = Post.objects.filter(is_published=True)
+    if continent and continent != 'All':
+        posts = posts.filter(continent=continent)
+    if author:
+        posts = posts.filter(author__username=author)
+    return posts.order_by('-created_at')
+
+@api.get("/my-posts", response=List[PostListSchema], auth=JWTAuth())
+def my_posts(request):
+    return Post.objects.filter(author=request.auth).order_by('-created_at')

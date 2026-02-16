@@ -102,8 +102,10 @@ const ProfilePage = () => {
             });
 
             if (res.ok) {
-                setMyPosts(myPosts.filter(p => p.slug !== slug));
-                setUser(prev => ({...prev, stories_count: prev.stories_count - 1}));
+                const newPosts = myPosts.filter(p => p.slug !== slug);
+                
+                setMyPosts(newPosts);
+                setUser(prev => ({...prev, stories_count: newPosts.length}));
             } else {
                 alert("Failed to delete post");
             }
