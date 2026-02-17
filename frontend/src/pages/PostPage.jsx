@@ -27,7 +27,7 @@ const PostPage = () => {
             });
     }, [slug]);
 
-    if (loading) return <div style={{height: '100vh', background: '#FFF'}}></div>;
+    if (loading) return <div style={{height: '100vh', background: '#F4F7F4'}}></div>;
     if (!post) return <div style={{padding: '100px', textAlign: 'center'}}>Post not found</div>;
 
     const isAuthor = currentUser === post.author;
@@ -73,9 +73,10 @@ const PostPage = () => {
                 {post.blocks.map((block) => (
                     <div key={block.id || Math.random()} className="content-block">
                         {block.type === 'text' && (
-                            <div className="text-block" style={{whiteSpace: 'pre-line'}}>
-                                {block.text_content}
-                            </div>
+                            <div 
+                                className="text-block" 
+                                dangerouslySetInnerHTML={{ __html: block.text_content }}
+                            />
                         )}
                         {block.type === 'image' && (block.image_url || block.image_content) && (
                             <div className="image-block">

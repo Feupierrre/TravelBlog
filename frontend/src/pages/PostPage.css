@@ -42,21 +42,6 @@
     animation: fadeInUp 1s ease-out;
 }
 
-.post-continent-badge {
-    display: inline-block;
-    padding: 8px 18px;
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 25px;
-    color: white;
-}
-
 .post-title {
     font-family: var(--font-serif);
     font-size: 4.5rem;
@@ -78,89 +63,33 @@
     gap: 15px;
 }
 
-.post-content-container {
-    max-width: 800px; 
-    margin: 0 auto;
-    padding: 0 20px 100px;
-}
-
-.content-block {
-    margin-bottom: 50px;
-}
-
-.text-block {
-    font-family: 'Georgia', serif; 
-    font-size: 1.3rem;
-    line-height: 1.8;
-    color: #222;
-    white-space: pre-wrap;
-}
-
-.image-block {
-    width: 100%;
-    margin: 60px 0;
-}
-
-.post-image {
-    width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.author-box {
-    margin-top: 80px;
-    padding-top: 40px;
-    border-top: 1px solid #EEE;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-    .post-title { font-size: 2.8rem; }
-    .post-hero { height: 100vh; }
-}
 .btn-edit-post {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 50px;
-    
     color: white;
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    
     margin-top: 30px; 
-}
-
-.btn-edit-post:hover {
-    background: white;
-    color: #1A1A1A;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .post-content-container {
     max-width: 800px; 
     margin: 0 auto;
     padding: 0 20px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px; 
 }
 
 .content-block {
-    margin-bottom: 50px;
+    width: 100%;
+    display: block;
 }
 
 .text-block {
@@ -168,48 +97,57 @@
     font-size: 1.3rem;
     line-height: 1.8;
     color: #222;
-    white-space: pre-wrap;
+    width: 100%;
+    overflow-wrap: break-word; 
+}
+
+.text-block p { 
+    margin-bottom: 1.5em; 
+    margin-top: 0;
+}
+.text-block h1 { 
+    font-family: var(--font-sans); margin-top: 1.5em; margin-bottom: 0.5em; 
+    font-size: 2rem; font-weight: 800; 
+}
+.text-block h2 { 
+    font-family: var(--font-sans); margin-top: 1.2em; margin-bottom: 0.5em; 
+    font-size: 1.6rem; font-weight: 700; 
+}
+.text-block ul, .text-block ol { 
+    margin-bottom: 1.5em; padding-left: 1.5em; 
 }
 
 .image-block {
     width: 100%;
-    margin: 60px 0;
 }
 
 .post-image {
     width: 100%;
+    height: auto;
+    display: block;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .author-box {
-    margin-top: 40px;     
-    padding: 20px;       
-    border-top: 1px solid #EEE;
+    margin-top: 60px;     
+    padding: 30px;       
+    border-top: 1px solid #E0E0E0;
     display: flex;
     align-items: center;
-    gap: 20px;             
+    gap: 25px;             
     text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease; 
-    border-radius: 12px;   
-}
-
-.author-box:hover {
-    background-color: #fcfcfc; 
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box; 
 }
 
 .author-avatar-wrapper {
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
     background: #F0F0F0;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #888;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -223,20 +161,10 @@
 .author-info {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-}
-
-.author-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    color: #999;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
 }
 
 .author-name {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: #1A1A1A;
 }
@@ -244,8 +172,4 @@
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-    .post-title { font-size: 2.8rem; }
 }

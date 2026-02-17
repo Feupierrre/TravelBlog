@@ -1,102 +1,74 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import './CreatePostPage.css';
 
 const CONTINENTS = [
     'Europe', 'Asia', 'Africa', 'North America', 'South America', 'Oceania', 'Antarctica'
 ];
-
+const QUILL_MODULES = {
+    toolbar: [
+        [{ 'header': [1, 2, false] }], 
+        ['bold', 'italic', 'underline', 'strike'], 
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['clean'] 
+    ],
+};
 const CreatePostPage = () => {
-    const navigate = useNavigate();
     const { slug } = useParams();
+    const navigate = useNavigate();
     const isEditMode = !!slug;
 
+    const [loading, setLoading] = useState(isEditMode);
     const [title, setTitle] = useState('');
-    const [locationName, setLocationName] = useState('');
-    const [continent, setContinent] = useState('Europe'); 
+    const [continent, setContinent] = useState('Europe');
+    const [location, setLocation] = useState('');
     const [coverImage, setCoverImage] = useState(null);
     const [coverPreview, setCoverPreview] = useState(null);
-    
     const [blocks, setBlocks] = useState([
-        { id: 'init-1', type: 'text', content: '' }, 
-        { id: 'init-2', type: 'image', file: null, preview: null }
+        { id: Date.now(), type: 'text', content: '' }
     ]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        if (!isEditMode) return;
 
-        const token = localStorage.getItem('accessToken');
-        const currentUser = localStorage.getItem('username');
-        if (!token){
-            navigate('/login');
-            return;
-        }
+        const fetchPostData = async () => {
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/posts/${slug}`);
+                if (!res.ok) throw new Error("Post not found");
+                const data = await res.json();
 
-        if (isEditMode) {
-            setIsLoading(true);
-            fetch(`http://127.0.0.1:8000/api/posts/${slug}`)
-                .then(res => {
-                    if (!res.ok) throw new Error("Post not found");
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.author !== currentUser){
-                        alert("You don't have permission to edit this story")
-                        navigate('/')
-                        return;
-                    }
+                setTitle(data.title);
+                setContinent(data.continent);
+                setLocation(data.location_name);
+                if (data.cover_image_url) {
+                    setCoverPreview(`http://127.0.0.1:8000${data.cover_image_url}`);
+                }
 
-                    setTitle(data.title);
-                    setLocationName(data.location_name);
-                    setContinent(data.continent);
-                    if (data.cover_image_url) {
-                        setCoverPreview(`http://127.0.0.1:8000${data.cover_image_url}`);
-                    }
-                    
-                    const loadedBlocks = data.blocks.map((b, index) => ({
-                        id: `server-${b.id}-${index}`, 
-                        type: b.type,
-                        content: b.text_content || '',
-                        preview: b.image_url ? `http://127.0.0.1:8000${b.image_url}` : null,
-                        file: null
+                if (data.blocks && data.blocks.length > 0) {
+                    const formattedBlocks = data.blocks.map(block => ({
+                        id: block.id || Math.random(),
+                        type: block.type,
+                        content: block.type === 'text' ? block.text_content : null,
+                        existingUrl: block.image_url ? `http://127.0.0.1:8000${block.image_url}` : null,
+                        preview: block.image_url ? `http://127.0.0.1:8000${block.image_url}` : null
                     }));
-                    setBlocks(loadedBlocks);
-                    setIsLoading(false);
-                })
-                .catch(err => {
-                    console.error(err);
-                    navigate('/');
-                });
-        }
-    }, [isEditMode, slug, navigate]);
+                    setBlocks(formattedBlocks);
+                } else {
+                    setBlocks([{ id: Date.now(), type: 'text', content: '' }]);
+                }
+            } catch (error) {
+                console.error("Error fetching post:", error);
+                alert("Error loading post data");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const addTextBlock = () => {
-        setBlocks([...blocks, { id: `new-text-${Date.now()}`, type: 'text', content: '' }]);
-    };
-
-    const addImageBlock = () => {
-        setBlocks([...blocks, { id: `new-img-${Date.now()}`, type: 'image', file: null, preview: null }]);
-    };
-
-    const updateTextBlock = (id, text) => {
-        setBlocks(blocks.map(b => b.id === id ? { ...b, content: text } : b));
-    };
-
-    const updateImageBlock = (id, file) => {
-        const previewUrl = URL.createObjectURL(file);
-        setBlocks(blocks.map(b => b.id === id ? { ...b, file: file, preview: previewUrl } : b));
-    };
-
-    const removeImageFromBlock = (id, e) => {
-        e.stopPropagation();
-        setBlocks(blocks.map(b => b.id === id ? { ...b, file: null, preview: null } : b));
-    };
-
-    const removeBlock = (id) => {
-        setBlocks(blocks.filter(b => b.id !== id));
-    };
+        fetchPostData();
+    }, [slug, isEditMode]);
 
     const handleCoverChange = (e) => {
         const file = e.target.files[0];
@@ -106,202 +78,187 @@ const CreatePostPage = () => {
         }
     };
 
-    const handlePublish = async (e) => {
+    const addBlock = (type) => {
+        setBlocks(prev => [...prev, { id: Date.now(), type, content: '' }]);
+    };
+
+    const removeBlock = (id) => {
+        setBlocks(prev => prev.filter(b => b.id !== id));
+    };
+
+    const moveBlock = (index, direction) => {
+        setBlocks(prev => {
+            const newBlocks = [...prev];
+            if (direction === 'up' && index > 0) {
+                [newBlocks[index], newBlocks[index - 1]] = [newBlocks[index - 1], newBlocks[index]];
+            } else if (direction === 'down' && index < newBlocks.length - 1) {
+                [newBlocks[index], newBlocks[index + 1]] = [newBlocks[index + 1], newBlocks[index]];
+            }
+            return newBlocks;
+        });
+    };
+
+    const handleBlockChange = (id, value) => {
+        setBlocks(prev => prev.map(b => b.id === id ? { ...b, content: value } : b));
+    };
+
+    const handleImageBlockChange = (id, file) => {
+        if (file) {
+            setBlocks(prev => prev.map(b => b.id === id ? { 
+                ...b, 
+                content: file, 
+                preview: URL.createObjectURL(file),
+                existingUrl: null
+            } : b));
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert("Please log in first");
+            return;
+        }
 
         const formData = new FormData();
         formData.append('title', title);
-        formData.append('location_name', locationName);
-        formData.append('continent', continent); 
-        
+        formData.append('continent', continent);
+        formData.append('location_name', location);
         if (coverImage) {
             formData.append('cover', coverImage);
         }
 
-        const blocksStructure = blocks.map(block => ({
-            type: block.type,
-            content: block.type === 'text' ? block.content : null,
-            existing_url: (block.type === 'image' && block.preview && !block.file) ? block.preview : null
-        }));
-
-        formData.append('blocks_data', JSON.stringify(blocksStructure));
+        const blocksMeta = [];
 
         blocks.forEach((block, index) => {
-            if (block.type === 'image' && block.file) {
-                formData.append(`block_image_${index}`, block.file);
+            const blockData = { type: block.type };
+            
+            if (block.type === 'text') {
+                blockData.content = block.content;
+            } else if (block.type === 'image') {
+                if (block.existingUrl && !block.content) {
+                    blockData.existing_url = block.existingUrl;
+                }
+            }
+            blocksMeta.push(blockData);
+
+            if (block.type === 'image' && block.content instanceof File) {
+                formData.append(`block_image_${index}`, block.content);
             }
         });
 
-        const token = localStorage.getItem('accessToken');
+        formData.append('blocks_data', JSON.stringify(blocksMeta));
+
         const url = isEditMode 
             ? `http://127.0.0.1:8000/api/posts/${slug}/update`
-            : 'http://127.0.0.1:8000/api/posts/create';    
-        
-        try {
-            if (!isEditMode) {
-                blocks.forEach((block, index) => {
-                    formData.append(`block_${index}_type`, block.type);
-                    if (block.type === 'text') formData.append(`block_${index}_content`, block.content);
-                    if (block.type === 'image' && block.file) formData.append(`block_${index}_image`, block.file);
-                });
-            }
+            : `http://127.0.0.1:8000/api/posts/create`;
 
+        try {
             const res = await fetch(url, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData
             });
 
             if (res.ok) {
                 const data = await res.json();
-                navigate(`/post/${data.slug}`);
+                navigate(`/post/${data.slug || slug}`);
             } else {
                 const errData = await res.json();
-                alert(`Error saving story: ${errData.message || 'Unknown error'}`);
+                console.error("Submission error:", errData);
+                alert("Error saving post");
             }
         } catch (err) {
             console.error(err);
-            alert('Something went wrong');
-        } finally {
-            setIsSubmitting(false);
+            alert("Something went wrong");
         }
     };
 
-    if (isLoading) return <div style={{paddingTop: '120px', textAlign: 'center'}}>Loading editor...</div>;
+    if (loading) return <div className="loading-screen">Loading...</div>;
 
     return (
-        <div className="editor-container">
+        <div className="create-page-wrapper">
             <Header />
-
-            <form onSubmit={handlePublish} className="editor-form">
-                
+            <div className="editor-container">
                 <h1 className="page-header-title">
-                    {isEditMode ? 'Edit Story ✏️' : 'Write a New Story ✍️'}
+                    {isEditMode ? 'Edit Story' : 'Write a New Story'}
                 </h1>
                 <div className="title-underline"></div>
 
-                <div className="cover-upload-wrapper">
-                    <div 
-                        className={`cover-upload-area ${coverPreview ? 'has-image' : ''}`}
-                        onClick={() => document.getElementById('coverInput').click()}
-                    >
-                        <input id="coverInput" type="file" hidden accept="image/*" onChange={handleCoverChange} />
-                        
-                        {coverPreview ? (
-                            <img src={coverPreview} alt="Cover" className="cover-preview" />
-                        ) : (
-                            <div className="cover-placeholder">
-                                <span className="material-symbols-outlined cover-icon">add_photo_alternate</span>
-                                <span className="cover-text">Add a cover image</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="editor-meta-card">
-                    <input 
-                        type="text" 
-                        className="editor-title"
-                        placeholder="Story Title..."
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                    />
-                    <div className="meta-row">
-                        <input 
-                            type="text" 
-                            className="location-input"
-                            placeholder="📍 Add location (e.g. Paris, France)"
-                            value={locationName}
-                            onChange={(e) => setLocationName(e.target.value)}
-                            required
-                        />
-                        <select 
-                            className="continent-select"
-                            value={continent}
-                            onChange={(e) => setContinent(e.target.value)}
-                        >
-                            {CONTINENTS.map(c => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-                <div className="editor-blocks">
-                    {blocks.map((block, index) => (
-                        <div key={block.id} className="editor-block">
-                            <span className="block-number">{index + 1 < 10 ? `0${index + 1}` : index + 1}</span>
-                            <button 
-                                type="button" 
-                                className="btn-remove-block"
-                                onClick={() => removeBlock(block.id)}
-                                title="Remove block"
-                            >
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
-                            </button>
-                            {block.type === 'text' && (
-                                <textarea 
-                                    className="editor-textarea"
-                                    placeholder="Type something here..."
-                                    value={block.content}
-                                    onChange={(e) => updateTextBlock(block.id, e.target.value)}
-                                    rows={4}
-                                />
+                <form onSubmit={handleSubmit}>
+                    <div className="cover-upload-wrapper">
+                        <label className="cover-upload-area">
+                            {coverPreview ? (
+                                <img src={coverPreview} alt="Cover" className="cover-preview-img" />
+                            ) : (
+                                <div className="cover-placeholder-content">
+                                    <span className="material-symbols-outlined" style={{fontSize: '48px'}}>add_photo_alternate</span>
+                                    <span>{isEditMode ? 'Change Cover' : 'Add Cover Image'}</span>
+                                </div>
                             )}
-                            {block.type === 'image' && (
-                                <div 
-                                    className={`editor-image-upload ${block.preview ? 'has-image' : ''}`}
-                                    onClick={() => !block.preview && document.getElementById(`fileInput-${block.id}`).click()}
-                                >
-                                    <input 
-                                        id={`fileInput-${block.id}`}
-                                        type="file" accept="image/*" hidden
-                                        onChange={(e) => {
-                                            if (e.target.files[0]) updateImageBlock(block.id, e.target.files[0]);
-                                            e.target.value = null; 
-                                        }} 
-                                    />
-                                    {block.preview ? (
-                                        <>
-                                            <img src={block.preview} alt="preview" className="editor-img-preview" />
-                                            <button 
-                                                type="button" 
-                                                className="btn-remove-image-inside"
-                                                onClick={(e) => removeImageFromBlock(block.id, e)}
-                                            >
-                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
-                                            </button>
-                                        </>
+                            <input type="file" hidden accept="image/*" onChange={handleCoverChange} />
+                        </label>
+                    </div>
+
+                    <input type="text" placeholder="Title..." className="input-title" value={title} onChange={e => setTitle(e.target.value)} required />
+
+                    <div className="meta-row">
+                        <select value={continent} onChange={e => setContinent(e.target.value)} className="select-continent">
+                            {CONTINENTS.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <input type="text" placeholder="Location..." className="input-location" value={location} onChange={e => setLocation(e.target.value)} required />
+                    </div>
+
+                    <div className="blocks-list">
+                        {blocks.map((block, index) => (
+                            <div key={block.id} className="block-container">
+                                <div className="block-header">
+                                    <span className="block-number">Block {index + 1}</span>
+                                    <div className="block-actions">
+                                        <button type="button" onClick={() => moveBlock(index, 'up')} disabled={index === 0} className="btn-icon">↑</button>
+                                        <button type="button" onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} className="btn-icon">↓</button>
+                                        <button type="button" onClick={() => removeBlock(block.id)} className="btn-icon btn-delete">×</button>
+                                    </div>
+                                </div>
+                                <div className="block-content-area">
+                                    {block.type === 'text' ? (
+                                        <div className="quill-wrapper">
+                                            <ReactQuill 
+                                                theme="snow"
+                                                value={block.content || ''}
+                                                onChange={(value) => handleBlockChange(block.id, value)}
+                                                modules={QUILL_MODULES}
+                                                placeholder="Tell your story..."
+                                            />
+                                        </div>
                                     ) : (
-                                        <div className="image-upload-placeholder">
-                                            <span className="material-symbols-outlined placeholder-icon">add_photo_alternate</span>
-                                            <div className="placeholder-text">Click to upload</div>
+                                        <div className="image-upload-area">
+                                            {block.preview ? (
+                                                <img src={block.preview} alt="Preview" className="block-img-preview" />
+                                            ) : (
+                                                <div className="image-placeholder-text">Image</div>
+                                            )}
+                                            <input type="file" className="file-input-hidden" accept="image/*" onChange={(e) => handleImageBlockChange(block.id, e.target.files[0])} />
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-                <div className="editor-controls">
-                    <button type="button" className="btn-add-block" onClick={addTextBlock}>
-                        <span className="material-symbols-outlined">text_fields</span> Add Text
-                    </button>
-                    <button type="button" className="btn-add-block" onClick={addImageBlock}>
-                        <span className="material-symbols-outlined">image</span> Add Image
-                    </button>
-                </div>
-                <div className="editor-footer">
-                    <div className="footer-pill">
-                        <span>{isEditMode ? 'Finished editing?' : 'Ready to share?'}</span>
-                        <button type="submit" className="btn-publish" disabled={isSubmitting}>
-                            {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Story' : 'Publish Story')}
-                        </button>
+                            </div>
+                        ))}
                     </div>
-                </div>
 
-            </form>
+                    <div className="add-block-buttons">
+                        <button type="button" className="btn-add" onClick={() => addBlock('text')}>Add Text</button>
+                        <button type="button" className="btn-add" onClick={() => addBlock('image')}>Add Image</button>
+                    </div>
+
+                    <div style={{textAlign: 'center', marginTop: '60px'}}>
+                        <button type="submit" className="btn-publish">{isEditMode ? 'Save Changes' : 'Publish Story'}</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
