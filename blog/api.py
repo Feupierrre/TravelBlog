@@ -11,9 +11,21 @@ from django.utils.text import slugify
 from django.db.models import Q
 import uuid
 import json
+import re
 
 api = NinjaExtraAPI()
 api.register_controllers(NinjaJWTDefaultController)
+
+
+def clean_quill_html(html: str) -> str:
+    if not html:
+        return html
+    html = html.replace('&nbsp;', ' ')
+    html = html.replace('\u00a0', ' ')  
+    html = re.sub(r'\s*style="[^"]*"', '', html)
+    html = html.replace('\u00ad', '').replace('&shy;', '')
+    return html
+
 
 # --- SCHEMAS ---
 
@@ -207,7 +219,7 @@ def create_post(request, payload: PostCreateSchema = Form(...),
                     post=post,
                     type='text',
                     position=index,
-                    text_content=content
+                    text_content=clean_quill_html(content)  # ← ФИКС
                 )
         elif b_type == 'image':
             file_key = f'block_image_{index}'
@@ -327,7 +339,7 @@ def update_post(request, slug: str, payload: PostCreateSchema = Form(...),
                     post=post,
                     type='text',
                     position=index,
-                    text_content=content
+                    text_content=clean_quill_html(content)  # ← ФИКС
                 )
         elif b_type == 'image':
             file_key = f'block_image_{index}'

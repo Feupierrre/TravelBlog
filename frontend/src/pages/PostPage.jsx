@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
+// Убрали импорт стилей Quill, чтобы они не мешали отображению
 import './PostPage.css';
 
 const PostPage = () => {
@@ -35,6 +36,7 @@ const PostPage = () => {
     return (
         <div className="post-page">
             <Header />
+            
             <div className="post-hero">
                 {post.cover_image_url ? (
                     <img src={`http://127.0.0.1:8000${post.cover_image_url}`} alt={post.title} className="post-hero-bg" />
@@ -60,7 +62,6 @@ const PostPage = () => {
                         <span>•</span>
                         <span style={{marginLeft: '10px'}}>{post.created_at}</span>
                     </div>
-
                     {isAuthor && (
                         <Link to={`/edit/${post.slug}`} className="btn-edit-post">
                             <span className="material-symbols-outlined" style={{fontSize: '18px'}}>edit</span>
@@ -69,9 +70,11 @@ const PostPage = () => {
                     )}
                 </div>
             </div>
+            
             <div className="post-content-container">
                 {post.blocks.map((block) => (
                     <div key={block.id || Math.random()} className="content-block">
+                        
                         {block.type === 'text' && (
                             <div 
                                 className="text-block" 
@@ -106,7 +109,6 @@ const PostPage = () => {
                         <div className="author-name">@{post.author}</div>
                     </div>
                 </Link>
-
             </div>
         </div>
     );
