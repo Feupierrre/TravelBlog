@@ -12,8 +12,12 @@ const ProfilePage = () => {
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
 
+    // Базовый URL API (лучше вынести в отдельный конфиг)
+    const API_URL = 'http://127.0.0.1:8000/api';
+
     const fetchUserData = (token) => {
-        fetch('http://127.0.0.1:8000/api/me', {
+        // 1. Получаем профиль
+        fetch(`${API_URL}/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => {
@@ -22,14 +26,15 @@ const ProfilePage = () => {
         })
         .then(data => {
             setUser(data);
-            setBio(data.bio || '');
+            setBio(data.profile?.bio || data.bio || ''); // Учитываем разную вложенность
         })
         .catch(() => {
             localStorage.removeItem('accessToken');
             navigate('/login');
         });
 
-        fetch('http://127.0.0.1:8000/api/my-posts', {
+        // 2. Получаем посты (ИСПРАВЛЕН URL)
+        fetch(`${API_URL}/posts/my-posts`, {
             headers: { 'Authorization': `Bearer ${token}` }       
         })
         .then(res => res.json())
@@ -61,19 +66,31 @@ const ProfilePage = () => {
         if (avatarFile) formData.append('avatar', avatarFile);
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/me/update', {
+            const res = await fetch(`${API_URL}/me/update`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
 
             if (res.ok) {
-                const updatedUser = await res.json();
-                setUser(updatedUser);
+                // Обновляем данные пользователя без перезагрузки страницы
+                const updatedData = await res.json();
+                setUser(prev => ({
+                    ...prev,
+                    // Обновляем поля, которые пришли с сервера
+                    ...updatedData, 
+                    // Если сервер возвращает profile внутри, обновляем и его
+                    profile: updatedData.profile || updatedData 
+                }));
                 setIsEditing(false);
                 setAvatarFile(null);
+                
+                // Если аватар обновился, сбрасываем превью
+                if (updatedData.avatar_url) {
+                    setAvatarPreview(null); 
+                }
             } else {
-                alert("Error saving");
+                alert("Error saving profile");
             }
         } catch (err) { console.error(err); }
     };
@@ -81,12 +98,30 @@ const ProfilePage = () => {
     const handleToggleCountry = async (countryCode) => {
         const token = localStorage.getItem('accessToken');
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/countries', {
+            // Обрати внимание: этот роутер должен быть подключен в blog/api/__init__.py
+            const res = await fetch(`${API_URL}/countries`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ country_code: countryCode })
             });
-            if (res.ok) fetchUserData(token);
+            
+            if (res.ok) {
+                // Обновляем только список стран, чтобы не дергать весь профиль
+                const data = await res.json();
+                if (data.status === 'added') {
+                    setUser(prev => ({
+                        ...prev,
+                        visited_countries: [...prev.visited_countries, data.code],
+                        countries_count: prev.countries_count + 1
+                    }));
+                } else if (data.status === 'removed') {
+                    setUser(prev => ({
+                        ...prev,
+                        visited_countries: prev.visited_countries.filter(c => c !== data.code),
+                        countries_count: prev.countries_count - 1
+                    }));
+                }
+            }
         } catch (err) { console.error(err); }
     };
 
@@ -96,14 +131,13 @@ const ProfilePage = () => {
 
         const token = localStorage.getItem('accessToken');
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/posts/${slug}`, {
+            const res = await fetch(`${API_URL}/posts/${slug}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.ok) {
                 const newPosts = myPosts.filter(p => p.slug !== slug);
-                
                 setMyPosts(newPosts);
                 setUser(prev => ({...prev, stories_count: newPosts.length}));
             } else {
@@ -115,21 +149,28 @@ const ProfilePage = () => {
         }
     };
 
-    if (!user) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1A251C', color: 'white' }}>Loading...</div>;
+    if (!user) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F4F7F4', color: '#222' }}>Loading...</div>;
 
-    const avatarUrl = avatarPreview 
-        ? avatarPreview 
-        : (user.avatar_url ? `http://127.0.0.1:8000${user.avatar_url}` : null);
+    // Логика отображения аватара
+    const getAvatarSrc = () => {
+        if (avatarPreview) return avatarPreview;
+        // Проверяем разные варианты, где может лежать URL аватара
+        if (user.avatar_url) return `http://127.0.0.1:8000${user.avatar_url}`;
+        if (user.profile && user.profile.avatar_url) return `http://127.0.0.1:8000${user.profile.avatar_url}`;
+        return null;
+    };
+    
+    const avatarSrc = getAvatarSrc();
 
     return (
         <div className="profile-container">
             <div className="profile-content-wrapper">
                 <div className="profile-card">
                     <div className="profile-avatar-wrapper">
-                        {avatarUrl ? (
-                            <img src={avatarUrl} alt="Avatar" className="profile-avatar" />
+                        {avatarSrc ? (
+                            <img src={avatarSrc} alt="Avatar" className="profile-avatar" />
                         ) : (
-                            <div className="profile-avatar">
+                            <div className="profile-avatar-placeholder">
                                 {user.username.charAt(0).toUpperCase()}
                             </div>
                         )}
@@ -164,22 +205,23 @@ const ProfilePage = () => {
                             />
                         ) : (
                             <p className="profile-bio">
-                                {user.bio || "No bio yet. Tell us your story!"}
+                                {bio || "No bio yet. Tell us your story!"}
                             </p>
                         )}
                         
                         <p className="profile-email">
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>mail</span> {user.email}
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px', verticalAlign: 'middle', marginRight: '5px' }}>mail</span> 
+                            {user.email}
                         </p>
                     </div>
 
                     <div className="profile-stats">
                         <div className="stat-item">
-                            <span className="stat-value">{user.countries_count}</span>
+                            <span className="stat-value">{user.countries_count || 0}</span>
                             <span className="stat-label">Countries</span>
                         </div>
                         <div className="stat-item">
-                            <span className="stat-value">{user.stories_count}</span>
+                            <span className="stat-value">{user.stories_count || 0}</span>
                             <span className="stat-label">Stories</span>
                         </div>
                     </div>
@@ -190,7 +232,7 @@ const ProfilePage = () => {
                 </h2>
                 
                 <WorldMap 
-                    visitedCodes={user.visited_countries} 
+                    visitedCodes={user.visited_countries || []} 
                     onCountryClick={handleToggleCountry} 
                 />
                 
@@ -243,7 +285,7 @@ const ProfilePage = () => {
                     ) : (
                         <div className="no-stories-placeholder">
                             You haven't written any stories yet. <br/>
-                            <Link to="/write" style={{color: 'var(--color-primary)', fontWeight: 'bold', marginTop: '10px', display: 'inline-block'}}>Start your first one!</Link>
+                            <Link to="/create" style={{color: '#4F7942', fontWeight: 'bold', marginTop: '10px', display: 'inline-block'}}>Start your first one!</Link>
                         </div>
                     )}
                 </div>
