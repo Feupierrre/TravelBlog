@@ -1,62 +1,41 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroSection from '../components/HeroSection';
+import { API_BASE_URL, MEDIA_URL } from '../config';
+import './HomePage.css'; 
 
 function HomePage() {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8000/api/posts')
+        fetch(`${API_BASE_URL}/posts`)
             .then(res => res.json())
-            .then(data => setPosts(data));
+            .then(data => setPosts(data))
+            .catch(err => console.error("Error loading posts:", err));
     }, []);
 
     return (
         <div> 
             <HeroSection />
-
-            <div className="container" style={{ paddingBottom: '60px' }}>                
-                <h2 style={{ marginBottom: '30px', fontSize: '2rem', marginTop: '40px' }}>Latest Stories ✍️</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+            <div className="container homepage-container">                
+                <h2 className="latest-stories-title">Latest Stories ✍️</h2>
+                <div className="posts-grid">
                     {posts.map(post => (
-                        <Link key={post.id} to={`/post/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>                            
-                            <div style={{ 
-                                border: '1px solid var(--color-border)', 
-                                borderRadius: 'var(--radius-lg)',       
-                                backgroundColor: 'var(--color-surface)',
-                                overflow: 'hidden',
-                                transition: 'all 0.3s ease',
-                                height: '100%',
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                            >
+                        <Link key={post.id} to={`/post/${post.slug}`} className="post-card-link">                            
+                            <div className="post-card">
                                 {post.cover_image_url && (
                                     <img 
-                                        src={`http://127.0.0.1:8000${post.cover_image_url}`} 
+                                        src={`${MEDIA_URL}${post.cover_image_url}`} 
                                         alt={post.title} 
-                                        style={{ width: '100%', height: '240px', objectFit: 'cover' }}
+                                        className="post-card-img"
                                     />
                                 )}
-                                
-                                <div style={{ padding: '24px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ 
-                                        fontSize: '0.75rem', 
-                                        fontWeight: '700', 
-                                        color: 'var(--color-primary)', 
-                                        textTransform: 'uppercase', 
-                                        letterSpacing: '1px',
-                                        marginBottom: '8px',
-                                        display: 'block'
-                                    }}>
-                                        Destination
-                                    </span>
-                                    <h2 style={{ fontSize: '1.4rem', marginBottom: '10px', lineHeight: '1.3' }}>
+                                <div className="post-card-content">
+                                    <span className="post-card-tag">Destination</span>
+                                    <h2 className="post-card-title">
                                         {post.title}
                                     </h2>
-                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginTop: 'auto' }}>
+                                    <p className="post-card-location">
                                         📍 {post.location_name}
                                     </p>
                                 </div>

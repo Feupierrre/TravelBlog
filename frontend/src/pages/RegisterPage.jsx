@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config'; 
 import './Auth.css'; 
 
 const RegisterPage = () => {
@@ -8,20 +9,17 @@ const RegisterPage = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/register', {
+            const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password })
             });
-
             const data = await response.json();
-
             if (response.ok) {
                 alert("Account created! Please log in.");
                 navigate('/login');
@@ -49,7 +47,6 @@ const RegisterPage = () => {
                             required 
                         />
                     </div>
-
                     <div className="form-group">
                         <label>Email</label>
                         <input 
@@ -61,7 +58,6 @@ const RegisterPage = () => {
                             required 
                         />
                     </div>
-
                     <div className="form-group">
                         <label>Password</label>
                         <input 
@@ -73,12 +69,9 @@ const RegisterPage = () => {
                             required 
                         />
                     </div>
-
-                    {error && <p style={{ color: 'red', fontSize: '0.9rem' }}>{error}</p>}
-
+                    {error && <p className="auth-error">{error}</p>}
                     <button type="submit" className="auth-btn">Sign Up</button>
                 </form>
-
                 <div className="auth-footer">
                     Already have an account? 
                     <Link to="/login" className="auth-link">Log In</Link>

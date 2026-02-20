@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
-// Убрали импорт стилей Quill, чтобы они не мешали отображению
+import { API_BASE_URL, MEDIA_URL } from '../config';
 import './PostPage.css';
 
 const PostPage = () => {
@@ -13,7 +13,7 @@ const PostPage = () => {
     useEffect(() => {
         window.scrollTo(0, 0);   
         setLoading(true);
-        fetch(`http://127.0.0.1:8000/api/posts/${slug}`)
+        fetch(`${API_BASE_URL}/posts/${slug}`)
             .then(res => {
                 if (!res.ok) throw new Error('Not found');
                 return res.json();
@@ -28,20 +28,22 @@ const PostPage = () => {
             });
     }, [slug]);
 
-    if (loading) return <div style={{height: '100vh', background: '#F4F7F4'}}></div>;
-    if (!post) return <div style={{padding: '100px', textAlign: 'center'}}>Post not found</div>;
-
+    if (loading) return <div className="post-loading-screen"></div>;
+    if (!post) return <div className="post-not-found">Post not found</div>;
     const isAuthor = currentUser === post.author;
 
     return (
         <div className="post-page">
             <Header />
-            
             <div className="post-hero">
                 {post.cover_image_url ? (
-                    <img src={`http://127.0.0.1:8000${post.cover_image_url}`} alt={post.title} className="post-hero-bg" />
+                    <img 
+                        src={`${MEDIA_URL}${post.cover_image_url}`} 
+                        alt={post.title} 
+                        className="post-hero-bg" 
+                    />
                 ) : (
-                    <div className="post-hero-bg" style={{background: '#222'}}></div>
+                    <div className="post-hero-bg post-hero-bg-placeholder"></div>
                 )}
                 <div className="post-hero-overlay"></div>
                 <div className="post-hero-content">
@@ -51,26 +53,22 @@ const PostPage = () => {
                     <h1 className="post-title">{post.title}</h1>
                     
                     <div className="post-meta">
-                        <Link 
-                            to={`/user/${post.author}`} 
-                            style={{color: '#fff', fontWeight: 'bold', textDecoration: 'none', marginRight: '10px'}}
-                        >
+                        <Link to={`/user/${post.author}`} className="post-author-link">
                             By @{post.author}
                         </Link>
-                        <span>•</span>
-                        <span style={{margin: '0 10px'}}>{post.location_name}</span>
-                        <span>•</span>
-                        <span style={{marginLeft: '10px'}}>{post.created_at}</span>
+                        <span className="post-meta-separator">•</span>
+                        <span>{post.location_name}</span>
+                        <span className="post-meta-separator">•</span>
+                        <span>{post.created_at}</span>
                     </div>
                     {isAuthor && (
                         <Link to={`/edit/${post.slug}`} className="btn-edit-post">
-                            <span className="material-symbols-outlined" style={{fontSize: '18px'}}>edit</span>
+                            <span className="material-symbols-outlined edit-icon">edit</span>
                             Edit Story
                         </Link>
                     )}
                 </div>
             </div>
-            
             <div className="post-content-container">
                 {post.blocks.map((block) => (
                     <div key={block.id || Math.random()} className="content-block">
@@ -84,7 +82,7 @@ const PostPage = () => {
                         {block.type === 'image' && (block.image_url || block.image_content) && (
                             <div className="image-block">
                                 <img 
-                                    src={block.image_url ? `http://127.0.0.1:8000${block.image_url}` : `http://127.0.0.1:8000${block.image_content}`} 
+                                    src={block.image_url ? `${MEDIA_URL}${block.image_url}` : `${MEDIA_URL}${block.image_content}`} 
                                     alt="Story moment" 
                                     className="post-image"
                                 />
@@ -96,7 +94,7 @@ const PostPage = () => {
                     <div className="author-avatar-wrapper">
                         {post.author_avatar_url ? (
                             <img 
-                                src={`http://127.0.0.1:8000${post.author_avatar_url}`} 
+                                src={`${MEDIA_URL}${post.author_avatar_url}`} 
                                 alt={post.author} 
                                 className="author-avatar-img"
                             />

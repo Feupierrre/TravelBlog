@@ -10,7 +10,6 @@ from ..schemas import RegisterSchema, UserProfileSchema, ProfileUpdateSchema, Pu
 
 router = Router()
 
-
 @router.post("/register")
 def register(request, payload: RegisterSchema):
     if User.objects.filter(username=payload.username).exists():

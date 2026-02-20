@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import WorldMap from '../components/WorldMap';
+import { API_BASE_URL, MEDIA_URL } from '../config'; // Подключаем конфиг
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -12,12 +13,8 @@ const ProfilePage = () => {
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
 
-    // Базовый URL API (лучше вынести в отдельный конфиг)
-    const API_URL = 'http://127.0.0.1:8000/api';
-
     const fetchUserData = (token) => {
-        // 1. Получаем профиль
-        fetch(`${API_URL}/me`, {
+        fetch(`${API_BASE_URL}/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => {
@@ -26,15 +23,14 @@ const ProfilePage = () => {
         })
         .then(data => {
             setUser(data);
-            setBio(data.profile?.bio || data.bio || ''); // Учитываем разную вложенность
+            setBio(data.profile?.bio || data.bio || ''); 
         })
         .catch(() => {
             localStorage.removeItem('accessToken');
             navigate('/login');
         });
 
-        // 2. Получаем посты (ИСПРАВЛЕН URL)
-        fetch(`${API_URL}/posts/my-posts`, {
+        fetch(`${API_BASE_URL}/posts/my-posts`, {
             headers: { 'Authorization': `Bearer ${token}` }       
         })
         .then(res => res.json())
@@ -66,26 +62,22 @@ const ProfilePage = () => {
         if (avatarFile) formData.append('avatar', avatarFile);
 
         try {
-            const res = await fetch(`${API_URL}/me/update`, {
+            const res = await fetch(`${API_BASE_URL}/me/update`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
 
             if (res.ok) {
-                // Обновляем данные пользователя без перезагрузки страницы
                 const updatedData = await res.json();
                 setUser(prev => ({
                     ...prev,
-                    // Обновляем поля, которые пришли с сервера
                     ...updatedData, 
-                    // Если сервер возвращает profile внутри, обновляем и его
                     profile: updatedData.profile || updatedData 
                 }));
                 setIsEditing(false);
                 setAvatarFile(null);
                 
-                // Если аватар обновился, сбрасываем превью
                 if (updatedData.avatar_url) {
                     setAvatarPreview(null); 
                 }
@@ -98,15 +90,13 @@ const ProfilePage = () => {
     const handleToggleCountry = async (countryCode) => {
         const token = localStorage.getItem('accessToken');
         try {
-            // Обрати внимание: этот роутер должен быть подключен в blog/api/__init__.py
-            const res = await fetch(`${API_URL}/countries`, {
+            const res = await fetch(`${API_BASE_URL}/countries`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ country_code: countryCode })
             });
             
             if (res.ok) {
-                // Обновляем только список стран, чтобы не дергать весь профиль
                 const data = await res.json();
                 if (data.status === 'added') {
                     setUser(prev => ({
@@ -131,11 +121,10 @@ const ProfilePage = () => {
 
         const token = localStorage.getItem('accessToken');
         try {
-            const res = await fetch(`${API_URL}/posts/${slug}`, {
+            const res = await fetch(`${API_BASE_URL}/posts/${slug}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
             if (res.ok) {
                 const newPosts = myPosts.filter(p => p.slug !== slug);
                 setMyPosts(newPosts);
@@ -149,17 +138,14 @@ const ProfilePage = () => {
         }
     };
 
-    if (!user) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F4F7F4', color: '#222' }}>Loading...</div>;
+    if (!user) return <div className="profile-loading-screen">Loading...</div>;
 
-    // Логика отображения аватара
     const getAvatarSrc = () => {
         if (avatarPreview) return avatarPreview;
-        // Проверяем разные варианты, где может лежать URL аватара
-        if (user.avatar_url) return `http://127.0.0.1:8000${user.avatar_url}`;
-        if (user.profile && user.profile.avatar_url) return `http://127.0.0.1:8000${user.profile.avatar_url}`;
+        if (user.avatar_url) return `${MEDIA_URL}${user.avatar_url}`;
+        if (user.profile && user.profile.avatar_url) return `${MEDIA_URL}${user.profile.avatar_url}`;
         return null;
     };
-    
     const avatarSrc = getAvatarSrc();
 
     return (
@@ -176,26 +162,24 @@ const ProfilePage = () => {
                         )}
                         {isEditing && (
                             <label className="btn-upload">
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_camera</span>
+                                <span className="material-symbols-outlined upload-icon">photo_camera</span>
                                 <input type="file" hidden accept="image/*" onChange={handleFileChange} />
                             </label>
                         )}
                     </div>
-
                     <div className="profile-info">
                         <div className="profile-header">
                             <h1 className="profile-name">{user.username}</h1>
                             {isEditing ? (
                                 <button onClick={handleSave} className="btn-edit btn-save">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check</span> Save
+                                    <span className="material-symbols-outlined action-icon">check</span> Save
                                 </button>
                             ) : (
                                 <button onClick={() => setIsEditing(true)} className="btn-edit">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span> Edit Profile
+                                    <span className="material-symbols-outlined action-icon">edit</span> Edit Profile
                                 </button>
                             )}
                         </div>
-
                         {isEditing ? (
                             <textarea 
                                 className="bio-input"
@@ -210,11 +194,10 @@ const ProfilePage = () => {
                         )}
                         
                         <p className="profile-email">
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px', verticalAlign: 'middle', marginRight: '5px' }}>mail</span> 
+                            <span className="material-symbols-outlined email-icon">mail</span> 
                             {user.email}
                         </p>
                     </div>
-
                     <div className="profile-stats">
                         <div className="stat-item">
                             <span className="stat-value">{user.countries_count || 0}</span>
@@ -228,22 +211,20 @@ const ProfilePage = () => {
                 </div>
                 
                 <h2 className="map-section-title">
-                    My Travel Map <span style={{ fontSize: '1.5rem', marginLeft: '10px' }}>🌍</span>
+                    My Travel Map <span className="section-emoji">🌍</span>
                 </h2>
                 
                 <WorldMap 
                     visitedCodes={user.visited_countries || []} 
                     onCountryClick={handleToggleCountry} 
                 />
-                
                 <h2 className="stories-section-title">
-                    My Stories <span style={{ fontSize: '1.5rem', marginLeft: '10px'}}>✍️</span>
+                    My Stories <span className="section-emoji">✍️</span>
                 </h2>
-                
                 <div className="stories-grid">
                     {myPosts.length > 0 ? (
                         myPosts.map(post => (
-                            <Link key={post.id} to={`/post/${post.slug}`} className="story-card" style={{position: 'relative'}}>
+                            <Link key={post.id} to={`/post/${post.slug}`} className="story-card">
                                 
                                 <button 
                                     className="card-action-btn btn-card-edit"
@@ -253,30 +234,31 @@ const ProfilePage = () => {
                                     }}
                                     title="Edit story"
                                 >
-                                    <span className="material-symbols-outlined" style={{fontSize: '18px'}}>edit</span>
+                                    <span className="material-symbols-outlined card-action-icon">edit</span>
                                 </button>
                                 <button 
                                     className="card-action-btn btn-card-delete"
                                     onClick={(e) => handleDelete(e, post.slug)}
                                     title="Delete story"
                                 >
-                                    <span className="material-symbols-outlined" style={{fontSize: '18px'}}>delete</span>
+                                    <span className="material-symbols-outlined card-action-icon">delete</span>
                                 </button>
+                                
                                 {post.cover_image_url ? (
                                     <img 
-                                        src={`http://127.0.0.1:8000${post.cover_image_url}`} 
+                                        src={`${MEDIA_URL}${post.cover_image_url}`} 
                                         alt={post.title} 
                                         className="story-card-image"
                                     />
                                 ) : (
-                                    <div className="story-card-image" style={{background: '#eee'}}></div>
+                                    <div className="story-card-image placeholder-bg"></div>
                                 )}
                                 
                                 <div className="story-card-content">
                                     <span className="story-card-tag">DESTINATION</span>
                                     <h3 className="story-card-title">{post.title}</h3>
                                     <div className="story-card-location">
-                                        <span className="material-symbols-outlined" style={{fontSize: '16px'}}> 📍 </span> 
+                                        <span className="material-symbols-outlined location-icon">📍</span> 
                                         {post.location_name}
                                     </div>
                                 </div>
@@ -285,7 +267,7 @@ const ProfilePage = () => {
                     ) : (
                         <div className="no-stories-placeholder">
                             You haven't written any stories yet. <br/>
-                            <Link to="/create" style={{color: '#4F7942', fontWeight: 'bold', marginTop: '10px', display: 'inline-block'}}>Start your first one!</Link>
+                            <Link to="/create" className="btn-create-first">Start your first one!</Link>
                         </div>
                     )}
                 </div>

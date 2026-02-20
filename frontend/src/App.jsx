@@ -9,7 +9,7 @@ import CreatePostPage from './pages/CreatePostPage';
 import AboutPage from './pages/AboutPage';
 import PlacesPage from './pages/PlacesPage';
 import PublicProfilePage from './pages/PublicProfilePage';
-import Footer from './components/footer';
+import Footer from './components/Footer';
 
 function App() {
   return (

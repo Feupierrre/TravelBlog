@@ -1,4 +1,3 @@
-
 .about-container {
     padding-top: 120px;
     padding-bottom: 100px;
@@ -74,29 +73,25 @@
     z-index: 10;
 }
 
-.section-heading-my-story {
-    font-family: var(--font-sans);
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 25px;
-    color: #1A1A1A;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
+.section-heading-my-story,
 .section-heading {
     font-family: var(--font-sans);
     font-size: 2.2rem;
     font-weight: 800;
-    margin-top: 50px;
-    margin-bottom: 25px;
     color: #1A1A1A;
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
+.section-heading-my-story {
+    margin-bottom: 25px;
+}
+
+.section-heading {
+    margin-top: 50px;
+    margin-bottom: 25px;
+}
 
 .section-heading::before {
     content: '';
@@ -170,13 +165,83 @@
     font-weight: bold;
 }
 
+.about-author-section {
+    margin-top: 60px; 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; 
+    border-top: 2px solid #eee; 
+    padding-top: 40px;
+}
+
+.about-author-image {
+    width: 90px; 
+    height: 90px; 
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 2px solid #1A1A1A; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.about-author-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.about-author-name {
+    font-size: 1.4rem; 
+    margin-bottom: 5px; 
+    font-family: var(--font-sans); 
+    font-weight: 800; 
+    color: #1A1A1A;
+}
+
+.about-author-role {
+    color: #555; 
+    font-size: 1rem; 
+    font-style: italic;
+    margin: 0;
+}
+
+
 @media (max-width: 900px) {
-    .about-title { font-size: 3rem; }
-    .about-hero-image-wrapper { height: 400px; }
+    .about-title { 
+        font-size: 2.8rem; 
+        letter-spacing: -1px;
+    }
+    
+    .about-hero-image-wrapper { 
+        height: 400px; 
+    }
+    
     .about-text-body {
         margin-top: -60px;
         padding: 30px 20px;
         width: 95%;
-        border-width: 2px;
+        border-width: 1px;
+    }
+
+    .section-heading, 
+    .section-heading-my-story { 
+        font-size: 1.8rem; 
+    }
+
+    .text-section p {
+        font-size: 1.1rem;
+    }
+
+    .text-section:first-child p:first-of-type::first-letter { 
+        font-size: 3.5rem; 
+        margin-top: 4px;
+    }
+
+    .about-list {
+        padding: 25px 20px;
+    }
+
+    .about-author-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
     }
 }

@@ -35,10 +35,6 @@ const WorldMap = ({ visitedCodes = [], onCountryClick }) => {
                     if (e.features && e.features.length > 0) {
                         const feature = e.features[0];
                         const countryCode = feature.properties.iso_a3;
-                        
-                        console.log("Clicked feature properties:", feature.properties); 
-                        console.log("Code:", countryCode); 
-
                         if (countryCode && onCountryClick) {
                             onCountryClick(countryCode);
                         }
@@ -53,8 +49,7 @@ const WorldMap = ({ visitedCodes = [], onCountryClick }) => {
                     <Layer {...countriesLayer} />
                 </Source>
             </Map>
-            
-            <div style={{ position: 'absolute', bottom: 20, left: 20, background: 'white', padding: '10px', borderRadius: '8px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <div className="map-hint">
                 👇 Click to mark visited
             </div>
         </div>

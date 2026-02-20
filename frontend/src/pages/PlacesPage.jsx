@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
+import { API_BASE_URL, MEDIA_URL } from '../config'; 
 import './PlacesPage.css';
 
 const CONTINENTS = [
-    'All', 
-    'Europe', 
-    'Asia', 
-    'Africa', 
-    'North America', 
-    'South America', 
-    'Oceania', 
-    'Antarctica'
+    'All', 'Europe', 'Asia', 'Africa', 'North America', 'South America', 'Oceania', 'Antarctica'
 ];
 
 const PlacesPage = () => {
@@ -19,6 +13,7 @@ const PlacesPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('continent') || 'All';
+
     const handleTabChange = (continent) => {
         if (continent === 'All') {
             setSearchParams({});
@@ -29,7 +24,7 @@ const PlacesPage = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        let url = 'http://127.0.0.1:8000/api/posts';
+        let url = `${API_BASE_URL}/posts`;
         if (activeTab !== 'All') {
             url += `?continent=${activeTab}`;
         }
@@ -59,6 +54,7 @@ const PlacesPage = () => {
                             Choose a continent to see stories from that part of the world.
                         </p>
                     </div>
+                    
                     <div className="filters-wrapper">
                         {CONTINENTS.map(continent => (
                             <button 
@@ -70,8 +66,9 @@ const PlacesPage = () => {
                             </button>
                         ))}
                     </div>
+
                     {isLoading ? (
-                        <div style={{textAlign: 'center', padding: '60px', color: '#999', fontSize: '1.2rem'}}>
+                        <div className="places-loading-state">
                             Loading stories...
                         </div>
                     ) : (
@@ -82,12 +79,12 @@ const PlacesPage = () => {
                                         <div className="place-img-wrapper">
                                             {post.cover_image_url ? (
                                                 <img 
-                                                    src={`http://127.0.0.1:8000${post.cover_image_url}`} 
+                                                    src={`${MEDIA_URL}${post.cover_image_url}`} 
                                                     alt={post.title} 
                                                     className="place-img"
                                                 />
                                             ) : (
-                                                <div className="place-img" style={{background: '#eee'}}></div>
+                                                <div className="place-img-placeholder"></div>
                                             )}
                                             <span className="place-continent-badge">
                                                 {post.continent}
@@ -109,15 +106,10 @@ const PlacesPage = () => {
                                 ))
                             ) : (
                                 <div className="empty-state">
-                                    <div style={{fontSize: '3rem', marginBottom: '10px'}}>🌍</div>
+                                    <div className="empty-state-icon">🌍</div>
                                     <h3>No stories in {activeTab} yet.</h3>
                                     <p>Be the first to write about this place!</p>
-                                    <Link to="/write" style={{
-                                        display: 'inline-block', 
-                                        marginTop: '15px', 
-                                        color: 'var(--color-primary)', 
-                                        fontWeight: 'bold'
-                                    }}>
+                                    <Link to="/write" className="empty-state-link">
                                         Start Writing →
                                     </Link>
                                 </div>

@@ -15,8 +15,6 @@ logger = logging.getLogger(__name__)
 
 router = Router()
 
-# 1. Сначала идут специфичные маршруты
-
 @router.post("/create", auth=JWTAuth())
 def create_post(request, payload: PostCreateSchema = Form(...),
                 blocks_data: str = Form(...),
@@ -65,14 +63,10 @@ def create_post(request, payload: PostCreateSchema = Form(...),
     return {"slug": post.slug, "message": "Story published!"}
 
 
-# ВАЖНО: Эта функция перемещена СЮДА (выше get_post), 
-# чтобы маршрут /{slug} не перехватывал запрос "my-posts"
 @router.get("/my-posts", response=List[PostListSchema], auth=JWTAuth())
 def my_posts(request):
     return Post.objects.filter(author=request.auth).order_by('-created_at')
 
-
-# 2. Затем идут универсальные маршруты (slug)
 
 @router.get("/{slug}", response=PostDetailSchema)
 def get_post(request, slug: str):

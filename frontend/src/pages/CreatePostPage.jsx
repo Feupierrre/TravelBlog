@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import './CreatePostPage.css';
+import { API_BASE_URL, MEDIA_URL } from '../config';
 
 const CONTINENTS = [
     'Europe', 'Asia', 'Africa', 'North America', 'South America', 'Oceania', 'Antarctica'
@@ -16,11 +17,11 @@ const QUILL_MODULES = {
         ['clean'] 
     ],
 };
+
 const CreatePostPage = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const isEditMode = !!slug;
-
     const [loading, setLoading] = useState(isEditMode);
     const [title, setTitle] = useState('');
     const [continent, setContinent] = useState('Europe');
@@ -36,24 +37,22 @@ const CreatePostPage = () => {
 
         const fetchPostData = async () => {
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/posts/${slug}`);
+                const res = await fetch(`${API_BASE_URL}/posts/${slug}`);
                 if (!res.ok) throw new Error("Post not found");
                 const data = await res.json();
-
                 setTitle(data.title);
                 setContinent(data.continent);
                 setLocation(data.location_name);
                 if (data.cover_image_url) {
-                    setCoverPreview(`http://127.0.0.1:8000${data.cover_image_url}`);
+                    setCoverPreview(`${MEDIA_URL}${data.cover_image_url}`);
                 }
-
                 if (data.blocks && data.blocks.length > 0) {
                     const formattedBlocks = data.blocks.map(block => ({
                         id: block.id || Math.random(),
                         type: block.type,
                         content: block.type === 'text' ? block.text_content : null,
-                        existingUrl: block.image_url ? `http://127.0.0.1:8000${block.image_url}` : null,
-                        preview: block.image_url ? `http://127.0.0.1:8000${block.image_url}` : null
+                        existingUrl: block.image_url ? `${MEDIA_URL}${block.image_url}` : null,
+                        preview: block.image_url ? `${MEDIA_URL}${block.image_url}` : null
                     }));
                     setBlocks(formattedBlocks);
                 } else {
@@ -77,15 +76,12 @@ const CreatePostPage = () => {
             setCoverPreview(URL.createObjectURL(file));
         }
     };
-
     const addBlock = (type) => {
         setBlocks(prev => [...prev, { id: Date.now(), type, content: '' }]);
     };
-
     const removeBlock = (id) => {
         setBlocks(prev => prev.filter(b => b.id !== id));
     };
-
     const moveBlock = (index, direction) => {
         setBlocks(prev => {
             const newBlocks = [...prev];
@@ -97,11 +93,9 @@ const CreatePostPage = () => {
             return newBlocks;
         });
     };
-
     const handleBlockChange = (id, value) => {
         setBlocks(prev => prev.map(b => b.id === id ? { ...b, content: value } : b));
     };
-
     const handleImageBlockChange = (id, file) => {
         if (file) {
             setBlocks(prev => prev.map(b => b.id === id ? { 
@@ -112,7 +106,6 @@ const CreatePostPage = () => {
             } : b));
         }
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('accessToken');
@@ -120,7 +113,6 @@ const CreatePostPage = () => {
             alert("Please log in first");
             return;
         }
-
         const formData = new FormData();
         formData.append('title', title);
         formData.append('continent', continent);
@@ -128,9 +120,7 @@ const CreatePostPage = () => {
         if (coverImage) {
             formData.append('cover', coverImage);
         }
-
         const blocksMeta = [];
-
         blocks.forEach((block, index) => {
             const blockData = { type: block.type };
             
@@ -142,18 +132,14 @@ const CreatePostPage = () => {
                 }
             }
             blocksMeta.push(blockData);
-
             if (block.type === 'image' && block.content instanceof File) {
                 formData.append(`block_image_${index}`, block.content);
             }
         });
-
         formData.append('blocks_data', JSON.stringify(blocksMeta));
-
         const url = isEditMode 
-            ? `http://127.0.0.1:8000/api/posts/${slug}/update`
-            : `http://127.0.0.1:8000/api/posts/create`;
-
+            ? `${API_BASE_URL}/posts/${slug}/update`
+            : `${API_BASE_URL}/posts/create`;
         try {
             const res = await fetch(url, {
                 method: 'POST',
@@ -162,7 +148,6 @@ const CreatePostPage = () => {
                 },
                 body: formData
             });
-
             if (res.ok) {
                 const data = await res.json();
                 navigate(`/post/${data.slug || slug}`);
@@ -187,7 +172,6 @@ const CreatePostPage = () => {
                     {isEditMode ? 'Edit Story' : 'Write a New Story'}
                 </h1>
                 <div className="title-underline"></div>
-
                 <form onSubmit={handleSubmit}>
                     <div className="cover-upload-wrapper">
                         <label className="cover-upload-area">
@@ -202,16 +186,13 @@ const CreatePostPage = () => {
                             <input type="file" hidden accept="image/*" onChange={handleCoverChange} />
                         </label>
                     </div>
-
                     <input type="text" placeholder="Title..." className="input-title" value={title} onChange={e => setTitle(e.target.value)} required />
-
                     <div className="meta-row">
                         <select value={continent} onChange={e => setContinent(e.target.value)} className="select-continent">
                             {CONTINENTS.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <input type="text" placeholder="Location..." className="input-location" value={location} onChange={e => setLocation(e.target.value)} required />
                     </div>
-
                     <div className="blocks-list">
                         {blocks.map((block, index) => (
                             <div key={block.id} className="block-container">
@@ -248,12 +229,10 @@ const CreatePostPage = () => {
                             </div>
                         ))}
                     </div>
-
                     <div className="add-block-buttons">
                         <button type="button" className="btn-add" onClick={() => addBlock('text')}>Add Text</button>
                         <button type="button" className="btn-add" onClick={() => addBlock('image')}>Add Image</button>
                     </div>
-
                     <div style={{textAlign: 'center', marginTop: '60px'}}>
                         <button type="submit" className="btn-publish">{isEditMode ? 'Save Changes' : 'Publish Story'}</button>
                     </div>

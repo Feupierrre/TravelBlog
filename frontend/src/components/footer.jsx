@@ -3,7 +3,7 @@ import './Footer.css';
 const Footer = () => {
     return (
         <footer className="footer">
-            @Anatolii Stainikov 2026
+            @ Anatolii Stainikov 2026
         </footer>
     );
 };

@@ -1,11 +1,13 @@
 .auth-container {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; 
     position: relative;
-    padding: 20px;
-    overflow: hidden; 
+    padding: 120px 20px 60px;
+    overflow-x: hidden; 
+    overflow-y: auto;
 }
 
 .auth-container::before {
@@ -47,11 +49,11 @@
     width: 100%;
     max-width: 480px;
     padding: 60px 50px;
-    
     background: #FFFFFF;
     border-radius: 4px;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-    text-align: left;
+    text-align: left;    
+    margin: auto 0; 
 }
 
 .auth-title {
@@ -144,7 +146,18 @@
     text-decoration: underline;
 }
 
+.auth-error {
+    color: #d32f2f;
+    font-size: 0.9rem;
+    margin-top: -5px;
+    margin-bottom: 0;
+}
+
 @media (max-width: 480px) {
-    .auth-card { padding: 40px 25px; }
-    .auth-title { font-size: 2rem; }
+    .auth-card { 
+        padding: 40px 25px; 
+    }
+    .auth-title { 
+        font-size: 2rem; 
+    }
 }
