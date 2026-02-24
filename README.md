@@ -30,13 +30,14 @@
 
 | **Main Page** | **About Page** |
 |:---:|:---:|
-| ![Main Page](./screenshots/main_page.png) | ![About Page](./screenshots/about_page.png) |
+| ![Main Page](./screenshots/main_page.png) | ![Places Page](./screenshots/places_page.png) |
 | **Places Page** | **Profile Page** |
-| ![Places Page](./screenshots/places_page.png) | ![Profile Page](./screenshots/profile_page.png) |
-| **Post creation editor** | **Post Page** |
-| ![Post creation editor](./screenshots/post_creation.png) | ![Post Page](./screenshots/post_page.png) |
+| ![About Page](./screenshots/about_page.png)| ![Profile Page](./screenshots/profile_page.png) |
 | **Login Page** | **Sign up Page** |
 | ![Login Page](./screenshots/login_page.png) | ![Sign up Page](./screenshots/sign_up_page.png) |
+| **Post creation editor** | **Post Page** |
+| ![Post creation editor](./screenshots/post_creation.png) | ![Post Page](./screenshots/post_page.png) |
+
 
 ---
 
